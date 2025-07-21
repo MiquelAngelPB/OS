@@ -26,8 +26,8 @@ loadkernel:
     mov dh, 0       ;head
     mov dl, [bootdrive] ;disk, will use the one that the BIOS gives you
     mov bx, 0x7e00  ;destination bx:es
-    mov ax, 0x0000  ;temporal value for es
-    mov es, ax      ;destination bx:es
+    mov cx, 0x0000  ;temporal value for es
+    mov es, cx      ;destination bx:es
     int 0x13
 
     jc diskerror         ;jump if carry flag is set (if there is a disk error)
