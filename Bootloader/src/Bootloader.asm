@@ -1,5 +1,12 @@
-;Registers: https://www.eecg.utoronto.ca/~amza/www.mindsec.com/files/x86regs.html
+;Resources:
+;Registers: https://www.eecg.utoronto.ca/~amza/www.mindsec.com/files/x86regs.html 
+;x86 instruction set: https://www.felixcloutier.com/x86/
+;ASCII codes: https://www.ascii-codes.com/ 
+;BIOS interrupt 13h: https://es.wikipedia.org/wiki/Int_13h;
+;Global Descriptor Table: https://www.youtube.com/watch?v=Wh5nPn2U_1w&list=PLm3B56ql_akNcvH8vvJRYOc7TbYhRs19M&index=6
+
 [ORG 0x7c00]
+[bits 16]
 
 section .text
     global start
@@ -30,7 +37,7 @@ loadkernel:
     mov ax, 0x0000  ;temporal value for es
     mov es, ax      ;destination bx:es
     pop ax
-    int 0x13        ;Check: https://www.ascii-codes.com/ and https://es.wikipedia.org/wiki/Int_13h
+    int 0x13
 
     jc diskerror         ;jump if carry flag is set (if there is a disk error)
 
@@ -39,11 +46,28 @@ loadkernel:
     call printstr
     pop bx
 
-    jmp 0x0000:0x7e00   ;jump to kernel
-
+    jmp protectedmode
     jmp halt            ;do nothing for eternity and beyond
 
-diskerror:              ;display disk error message
+protectedmode:
+    cli
+
+    lgdt [GDT_Descriptor]
+
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+
+    jmp CODE_SEGMENT:startprotectedmode
+
+    ret
+
+[bits 32]
+startprotectedmode:
+    
+    jmp 0x0000:0x7e00   ;jump to kernel
+
+diskerror:  ;display disk error message
     mov bx, errmsg
     call printstr
 
@@ -75,8 +99,35 @@ kernelmsg:
     db "Kernel loaded into memory...", 0x0D, 0x0A, 0
 errmsg:
     db "Disk error! ", 0x0D, 0x0A, 0
-teststr:
-    db "A", 0x0D, 0x0A, 0
+
+;Global Descriptor Table
+GDT_Start:
+    null_descriptor:
+        dd 0
+        dd 0
+    code_descriptor:
+        dw 0xffff
+        dw 0
+        db 0
+        db 0b10011010
+        db 0b11001111
+        db 0
+    data_descriptor:
+        dw 0xffff
+        dw 0
+        db 0
+        db 0b10010010
+        db 0b11001111
+        db 0
+GDT_End:
+
+GDT_Descriptor:
+    dw GDT_End - GDT_Start
+    dw GDT_Start
+
+;constants
+CODE_SEGMENT equ code_descriptor - GDT_Start
+DATA_SEGMENT equ data_descriptor - GDT_Start
 
 ;Padding and signature: the compiler executes this, not executed at runtime
 times 510-($-$$) db 0
