@@ -56,16 +56,9 @@ protectedmode:
 
     mov eax, cr0
     or eax, 1
-    mov cr0, eax
+    ;mov cr0, eax
 
     jmp CODE_SEGMENT:startprotectedmode
-
-    ret
-
-[bits 32]
-startprotectedmode:
-    
-    jmp 0x0000:0x7e00   ;jump to kernel
 
 diskerror:  ;display disk error message
     mov bx, errmsg
@@ -128,6 +121,11 @@ GDT_Descriptor:
 ;constants
 CODE_SEGMENT equ code_descriptor - GDT_Start
 DATA_SEGMENT equ data_descriptor - GDT_Start
+
+[bits 32]
+startprotectedmode:
+    
+    jmp 0x0000:0x7e00   ;jump to kernel
 
 ;Padding and signature: the compiler executes this, not executed at runtime
 times 510-($-$$) db 0

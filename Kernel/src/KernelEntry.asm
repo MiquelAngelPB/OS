@@ -5,11 +5,12 @@ section .text
 
 start:
     mov bx, string
-    call printstr
+    ;call printstr
+    jmp halt
 
-.halt:
+halt:
     hlt
-    jmp .halt
+    jmp halt
 
 printstr:
     pusha               
