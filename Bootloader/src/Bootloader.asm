@@ -8,8 +8,7 @@
 [ORG 0x7c00]
 [bits 16]
 
-section .text
-    global start
+KERNEL_ADDRESS equ 0x1000
 
 start:
     mov [bootdrive], dl
@@ -32,10 +31,10 @@ loadkernel:
     mov cl, 2       ;Sector inside the cylinder (starts at 1)
     mov dh, 0       ;head
     mov dl, [bootdrive] ;disk, will use the one that the BIOS gives you
-    mov bx, 0x7e00  ;destination bx:es
+    mov bx, KERNEL_ADDRESS  ;destination es:bx
     push ax
     mov ax, 0x0000  ;temporal value for es
-    mov es, ax      ;destination bx:es
+    mov es, ax      ;destination es:bx
     pop ax
     int 0x13
 
@@ -56,7 +55,7 @@ protectedmode:
 
     mov eax, cr0
     or eax, 1
-    ;mov cr0, eax
+    mov cr0, eax
 
     jmp CODE_SEGMENT:startprotectedmode
 
@@ -115,8 +114,8 @@ GDT_Start:
 GDT_End:
 
 GDT_Descriptor:
-    dw GDT_End - GDT_Start
-    dw GDT_Start
+    dw GDT_End - GDT_Start - 1
+    dd GDT_Start
 
 ;constants
 CODE_SEGMENT equ code_descriptor - GDT_Start
@@ -124,8 +123,20 @@ DATA_SEGMENT equ data_descriptor - GDT_Start
 
 [bits 32]
 startprotectedmode:
-    
-    jmp 0x0000:0x7e00   ;jump to kernel
+    mov ax, DATA_SEGMENT
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov fs, ax
+    mov gs, ax
+    mov ebp, 0x90000
+    mov esp, ebp
+
+    mov al, 'A'
+    mov ah, 0x0f
+    mov [0xb8000], ax
+    jmp $
+    jmp KERNEL_ADDRESS   ;jump to kernel
 
 ;Padding and signature: the compiler executes this, not executed at runtime
 times 510-($-$$) db 0
