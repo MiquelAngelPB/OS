@@ -4,6 +4,7 @@ KernelEntry_ASM = Kernel/src/KernelEntry.asm
 KernelEntry_O = Kernel/bin/KernelEntry.o
 Kernel_C = Kernel/src/Kernel.c
 Kernel_O = Kernel/bin/Kernel.o
+Kernel_ELF = Kernel/bin/Kernel.elf
 Kernel_BIN = Kernel/bin/Kernel.bin
 LinkerScript = LinkerScript.ld
 CrossCompiler = ../GCC-CrossCompiler/out/path/bin
@@ -21,8 +22,9 @@ kernelentry: $(KernelEntry_ASM)
 kernel: kernelentry
 	#The cross compiler was built with https://github.com/andrewrobinson5/Cross-Compiler-Build-Script by andrewrobinson5
 	#Thank you Andrew
-	$(CrossCompiler)/i686-elf-gcc -m32 -ffreestanding -c -g $(Kernel_C) -o $(Kernel_O)
-	$(CrossCompiler)/i686-elf-ld -T $(LinkerScript) $(KernelEntry_O) $(Kernel_O) --oformat binary -o $(Kernel_BIN)
+	$(CrossCompiler)/i686-elf-gcc -m32 -ffreestanding -c $(Kernel_C) -o $(Kernel_O)
+	$(CrossCompiler)/i686-elf-ld -T $(LinkerScript) -m elf_i386 $(KernelEntry_O) $(Kernel_O) -o $(Kernel_ELF)
+	$(CrossCompiler)/i686-elf-objcopy -O binary $(Kernel_ELF) $(Kernel_BIN)
 
 
 image: boot kernel
