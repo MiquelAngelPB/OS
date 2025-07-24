@@ -122,6 +122,7 @@ DATA_SEGMENT equ data_descriptor - GDT_Start
 
 [bits 32]
 startprotectedmode:
+    ;setup memory segments and stack
     mov ax, DATA_SEGMENT
     mov ds, ax
     mov es, ax
@@ -131,9 +132,6 @@ startprotectedmode:
     mov ebp, 0x90000
     mov esp, ebp
 
-    mov al, 'A'
-    mov ah, 0x0f
-    mov [0xb8000], ax
     jmp CODE_SEGMENT:KERNEL_ADDRESS   ;jump to kernel
 
 ;Padding and signature: the compiler executes this, not executed at runtime

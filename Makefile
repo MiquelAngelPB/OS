@@ -1,7 +1,12 @@
 Bootloader_ASM = Bootloader/src/Bootloader.asm
 Bootloader_BIN = Bootloader/bin/Bootloader.bin
 KernelEntry_ASM = Kernel/src/KernelEntry.asm
-KernelEntry_BIN = Kernel/bin/KernelEntry.bin
+KernelEntry_O = Kernel/bin/KernelEntry.o
+Kernel_C = Kernel/src/Kernel.c
+Kernel_O = Kernel/bin/Kernel.o
+Kernel_BIN = Kernel/bin/Kernel.bin
+LinkerScript = LinkerScript.ld
+CrossCompiler = ../GCC-CrossCompiler/out/path/bin
 IMG = img/os.img
 
 hello:
@@ -11,14 +16,18 @@ boot: $(Bootloader_ASM)
 	nasm $(Bootloader_ASM) -o $(Bootloader_BIN)
 
 kernelentry: $(KernelEntry_ASM)
-	nasm $(KernelEntry_ASM) -o $(KernelEntry_BIN)
+	nasm -f elf $(KernelEntry_ASM) -o $(KernelEntry_O)
 
-kernel:
-	echo "Here is where the kernel is compiled and linked with the kernel entry"
+kernel: kernelentry
+	#The cross compiler was built with https://github.com/andrewrobinson5/Cross-Compiler-Build-Script by andrewrobinson5
+	#Thank you Andrew
+	$(CrossCompiler)/i686-elf-gcc -m32 -ffreestanding -c -g $(Kernel_C) -o $(Kernel_O)
+	$(CrossCompiler)/i686-elf-ld -T $(LinkerScript) $(KernelEntry_O) $(Kernel_O) --oformat binary -o $(Kernel_BIN)
 
-image: boot kernelentry
+
+image: boot kernel
 	dd if=$(Bootloader_BIN) of=$(IMG) bs=512 count=2
-	dd if=$(KernelEntry_BIN) of=$(IMG) bs=512 count=2 seek=1
+	dd if=$(Kernel_BIN) of=$(IMG) bs=512 count=2 seek=1
 
 run: image
 	qemu-system-x86_64 -drive format=raw,file=$(IMG) -monitor stdio
@@ -26,5 +35,6 @@ run: image
 
 clean:
 	rm -f $(Bootloader_BIN)
-	rm -f $(KernelEntry_BIN)
+	rm -f $(KernelEntry_O)
+	rm -f $(Kenel_O)
 	rm -f $(IMG)

@@ -1,11 +1,10 @@
-[ORG 0x1000]
 [bits 32]
 
-start:
+extern kernelmain
+global start
 
-    mov al, 'K'
-    mov ah, 0x0f
-    mov [0xb8000], ax
+start:
+    call kernelmain ;VSCode may complain with a false error.
     jmp halt
 
 halt:
