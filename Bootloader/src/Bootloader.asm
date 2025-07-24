@@ -26,7 +26,7 @@ initializestack:
 
 loadkernel:
     mov ah, 0x02    ;read (block writing permissions)
-    mov al, 1       ;number of sectors (starts at 1)
+    mov al, 54     ;number of sectors (starts at 1)
     mov ch, 0       ;cylinder
     mov cl, 2       ;Sector inside the cylinder (starts at 1)
     mov dh, 0       ;head
