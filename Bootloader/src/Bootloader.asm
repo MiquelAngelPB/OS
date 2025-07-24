@@ -46,7 +46,6 @@ loadkernel:
     pop bx
 
     jmp protectedmode
-    jmp halt            ;do nothing for eternity and beyond
 
 protectedmode:
     cli
@@ -63,7 +62,7 @@ diskerror:  ;display disk error message
     mov bx, errmsg
     call printstr
 
-    jmp halt
+    jmp halt ;do nothing for eternity and beyond
 
 halt:
     jmp $
@@ -135,8 +134,7 @@ startprotectedmode:
     mov al, 'A'
     mov ah, 0x0f
     mov [0xb8000], ax
-    jmp $
-    jmp KERNEL_ADDRESS   ;jump to kernel
+    jmp CODE_SEGMENT:KERNEL_ADDRESS   ;jump to kernel
 
 ;Padding and signature: the compiler executes this, not executed at runtime
 times 510-($-$$) db 0

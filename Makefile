@@ -21,7 +21,7 @@ image: boot kernelentry
 	dd if=$(KernelEntry_BIN) of=$(IMG) bs=512 count=2 seek=1
 
 run: image
-	qemu-system-x86_64 -drive format=raw,file=$(IMG)
+	qemu-system-x86_64 -drive format=raw,file=$(IMG) -monitor stdio
 	#qemu-system-i386
 
 clean:
