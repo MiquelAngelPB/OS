@@ -1,5 +1,10 @@
 //console variables
 volatile char* buffer = (volatile char*)0xb8000;
+int color = 8;
+volatile char* colorIndicator = 0;
+char colors[10] = {
+    0x0f, 0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08, 0x07, 0x06 //Source: https://wiki.osdev.org/Text_UI
+};
 int col = 0;
 int row = 0;
 const int ROWS = 25;
@@ -12,13 +17,13 @@ char scancodeToASCII[128] = {
     'z','x','c','v','b','n','m',',','.','/',  0, '*',  0, ' ',
 };
 
-char* title = " \n"
+/*char* title = " \n"
 " #####  #####  \n"
 " #   #  #      \n"
 " #   #  #####  \n"
 " #   #      #  \n"
 " #####  #####  \n"
-"               \n";
+"               \n";*/
 
 void clear();
 void print(char* str);
@@ -28,14 +33,18 @@ extern void kernelmain(void)
 {
     clear();
     char* string = "Welcome to the kernel! Start writing...\n";
-    print(title);
+    char* string2 = "Use TAB to change color. Actual color: #\n\n";
+    //print(title);
     print(string);
+    print(string2);
+
+    colorIndicator = &buffer[0] + 239;
 
     int IsKeyPressed = 0;
     while(1)
     {
         char scancode;
-        __asm__ volatile 
+        __asm__ volatile
         (
             "inb $0x60, %0" : "=a"(scancode)
         );
@@ -67,7 +76,7 @@ void clear()
         for(int r = 0; r < ROWS; r++)
         {
             int i = (COLUMNS * r + c) * 2;
-            buffer[i] = ' ';
+            buffer[i] = '\0';
         }
     }
 }
@@ -89,24 +98,38 @@ void putchar(char c)
         col = 0;
         row = 0;
     }
-    
+
     if (col >= COLUMNS)
     {
         col = 0;
         row++;
     }
-    
 
+    int i = (COLUMNS * row + col) * 2;
     switch (c)
     {
         case '\n':
             col = 0;
             row++;
             break;
-    
+
+        case '\b':
+            if (col != 0)
+            {
+                buffer[i - 2] = ' ';
+                col--;
+            }
+            break;
+
+        case '\t':
+            color++;
+            color = color % 10;
+            *colorIndicator = colors[color];
+            break;
+
         default:
-            int i = (COLUMNS * row + col) * 2;
             buffer[i] = c;
+            buffer[i + 1] = colors[color];
             col++;
             break;
     }

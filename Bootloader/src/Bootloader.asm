@@ -21,27 +21,35 @@ start:
 initializestack:
     mov ax, 0x0000
     mov ss, ax
-    mov sp, 0x7BFF  ;just before the bootloader (counts down for some reason)
+    mov sp, 0x7BFF          ;just before the bootloader (counts down for some reason)
     jmp loadkernel
 
 loadkernel:
-    mov ah, 0x02    ;read (block writing permissions)
-    mov al, 54     ;number of sectors (starts at 1)
-    mov ch, 0       ;cylinder
-    mov cl, 2       ;Sector inside the cylinder (starts at 1)
-    mov dh, 0       ;head
-    mov dl, [bootdrive] ;disk, will use the one that the BIOS gives you
+    mov ah, 0x02            ;read (block writing permissions)
+    mov al, 54              ;number of sectors (starts at 1)
+    mov ch, 0               ;cylinder
+    mov cl, 2               ;Sector inside the cylinder (starts at 1)
+    mov dh, 0               ;head
+    mov dl, [bootdrive]     ;disk, will use the one that the BIOS gives you
     mov bx, KERNEL_ADDRESS  ;destination es:bx
     push ax
-    mov ax, 0x0000  ;temporal value for es
-    mov es, ax      ;destination es:bx
+    mov ax, 0x0000          ;temporal value for es
+    mov es, ax              ;destination es:bx
     pop ax
     int 0x13
 
-    jc diskerror         ;jump if carry flag is set (if there is a disk error)
+    ;----------------------------------------------------------------
+
+    ;TODO: Enable LBA adressing:
+
+    ;Sector = (LBA/SectorsPerTrack) Remainder value + 1
+    ;Cylinder = (LBA/SectorsPerTrack)/NumHeads (Take Remainder value)
+    ;Head = (LBA/SectorsPerTrack)/NumHeads (Take quotient value)
+
+    jc diskerror            ;jump if carry flag is set (if there is a disk error)
 
     push bx
-    mov bx, kernelmsg    ;display that the kernel has been loaded into memory
+    mov bx, kernelmsg       ;display that the kernel has been loaded into memory
     call printstr
     pop bx
 
