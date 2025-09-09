@@ -1,3 +1,5 @@
+extern unsigned char readKey();
+
 //console variables
 volatile char* buffer = (volatile char*)0xb8000;
 int color = 8;
@@ -44,10 +46,11 @@ extern void kernelmain(void)
     while(1)
     {
         char scancode;
-        __asm__ volatile
+        scancode = readKey();
+        /*__asm__ volatile
         (
             "inb $0x60, %0" : "=a"(scancode)
-        );
+        );*/
 
         if (scancode & 0x80)
         {

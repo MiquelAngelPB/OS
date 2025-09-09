@@ -7,7 +7,7 @@ start:
     mov ebp, 0x90000
     and ebp, 0xfffffff0
     mov esp, ebp
-    call kernelmain ;VSCode may complain with a false error.
+    call kernelmain ;VSCode might complain with a false error.
     jmp halt
 
 halt:
