@@ -19,13 +19,13 @@ char scancodeToASCII[128] = {
     'z','x','c','v','b','n','m',',','.','/',  0, '*',  0, ' ',
 };
 
-/*char* title = " \n"
+char* title = " \n"
 " #####  #####  \n"
 " #   #  #      \n"
 " #   #  #####  \n"
 " #   #      #  \n"
 " #####  #####  \n"
-"               \n";*/
+"               \n";
 
 void clear();
 void print(char* str);
@@ -36,21 +36,21 @@ extern void kernelmain(void)
     clear();
     char* string = "Welcome to the kernel! Start writing...\n";
     char* string2 = "Use TAB to change color. Actual color: #\n\n";
-    //print(title);
+    
+    color = 6;
+    print(title);
+
+    color = 8;
     print(string);
     print(string2);
 
-    colorIndicator = &buffer[0] + 239;
+    colorIndicator = &buffer[0] + 1359;
 
     int IsKeyPressed = 0;
     while(1)
     {
         char scancode;
         scancode = readKey();
-        /*__asm__ volatile
-        (
-            "inb $0x60, %0" : "=a"(scancode)
-        );*/
 
         if (scancode & 0x80)
         {

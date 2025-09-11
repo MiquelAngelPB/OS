@@ -4,6 +4,7 @@ extern kernelmain
 global start
 
 start:
+    
     mov ebp, 0x90000
     and ebp, 0xfffffff0
     mov esp, ebp

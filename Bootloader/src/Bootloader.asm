@@ -8,7 +8,12 @@
 [ORG 0x7c00]
 [bits 16]
 
-KERNEL_ADDRESS equ 0x1000
+
+KERNEL_SEGMENT  equ 0x1000
+KERNEL_OFFSET   equ 0x0000
+KERNEL_PHYSICAL equ (KERNEL_SEGMENT << 4) + KERNEL_OFFSET
+;KERNEL_SECTORS  equ 64
+KERNEL_START    dq 1
 
 start:
     mov [bootdrive], dl
@@ -25,28 +30,42 @@ initializestack:
     jmp loadkernel
 
 loadkernel:
-    mov ah, 0x02            ;read (block writing permissions)
-    mov al, 54              ;number of sectors (starts at 1)
-    mov ch, 0               ;cylinder
-    mov cl, 2               ;Sector inside the cylinder (starts at 1)
-    mov dh, 0               ;head
-    mov dl, [bootdrive]     ;disk, will use the one that the BIOS gives you
-    mov bx, KERNEL_ADDRESS  ;destination es:bx
-    push ax
-    mov ax, 0x0000          ;temporal value for es
-    mov es, ax              ;destination es:bx
-    pop ax
-    int 0x13
+    ;mov ah, 0x02            ;read (block writing permissions)
+    ;mov al, 54              ;number of sectors (starts at 1)
+    ;mov ch, 0               ;cylinder
+    ;mov cl, 2               ;Sector inside the cylinder (starts at 1)
+    ;mov dh, 0               ;head
+    ;mov dl, [bootdrive]     ;disk, will use the one that the BIOS gives you
+    ;mov bx, KERNEL_ADDRESS  ;destination es:bx
+    ;push ax
+    ;mov ax, 0x0000          ;temporal value for es
+    ;mov es, ax              ;destination es:bx
+    ;pop ax
+    ;int 0x13
 
     ;----------------------------------------------------------------
 
     ;TODO: Enable LBA adressing:
 
-    ;Sector = (LBA/SectorsPerTrack) Remainder value + 1
-    ;Cylinder = (LBA/SectorsPerTrack)/NumHeads (Take Remainder value)
-    ;Head = (LBA/SectorsPerTrack)/NumHeads (Take quotient value)
+    ;Check for extensions
+    mov ah, 0x41
+    mov bx, 0x55aa
+    mov dl, [bootdrive]
+    int 0x13
+    
+    jc extensionerr
+    cmp bx, 0xaa55
+    jne extensionerr
 
-    jc diskerror            ;jump if carry flag is set (if there is a disk error)
+    mov bx, extmsg
+    call printstr
+
+    call .preparedap
+    call .loadkernel_lba
+
+
+    ;data is suposed to be loaded, tell the user
+    jc diskerror            
 
     push bx
     mov bx, kernelmsg       ;display that the kernel has been loaded into memory
@@ -55,7 +74,31 @@ loadkernel:
 
     jmp protectedmode
 
-protectedmode:
+.preparedap:
+    mov ax, [KERNEL_START]
+    mov [dap + 8], ax
+    mov ax, [KERNEL_START + 2]
+    mov [dap + 10], ax
+    mov ax, [KERNEL_START + 4]
+    mov [dap + 12], ax
+    mov ax, [KERNEL_START + 6]
+    mov [dap + 14], ax
+    ret
+
+.loadkernel_lba:
+    mov ax, KERNEL_SEGMENT
+    mov es, ax
+    mov bx, KERNEL_OFFSET
+
+    mov dl, [bootdrive]
+    mov si, dap ; DS:SI --> DAP adress (DS is alredy set by the BIOS)
+
+    mov ah, 0x42
+    int 0x13
+
+    ret
+
+protectedmode:    
     cli
 
     lgdt [GDT_Descriptor]
@@ -66,14 +109,20 @@ protectedmode:
 
     jmp CODE_SEGMENT:startprotectedmode
 
-diskerror:  ;display disk error message
+diskerror:
     mov bx, errmsg
     call printstr
 
-    jmp halt ;do nothing for eternity and beyond
+    jmp halt
 
-halt:
-    jmp $
+extensionerr:
+    mov bx, errmsg2
+    call printstr
+
+    jmp halt
+
+halt: 
+    jmp $ ;do nothing for eternity and beyond
 
 printstr:
     pusha               
@@ -93,11 +142,15 @@ printstr:
 bootdrive: 
     db 0
 bootmsg:
-    db "Bootloader loaded...", 0x0D, 0x0A, 0
+    db "Bootloader running...", 0x0D, 0x0A, 0
 kernelmsg:
     db "Kernel loaded into memory...", 0x0D, 0x0A, 0
+extmsg:
+    db "Extensions are supported! ", 0x0D, 0x0A, 0
 errmsg:
     db "Disk error! ", 0x0D, 0x0A, 0
+errmsg2:
+    db "Extensions are not supported! ", 0x0D, 0x0A, 0
 
 ;Global Descriptor Table
 GDT_Start:
@@ -140,8 +193,17 @@ startprotectedmode:
     mov ebp, 0x90000
     mov esp, ebp
 
-    jmp CODE_SEGMENT:KERNEL_ADDRESS   ;jump to kernel
+    mov eax, KERNEL_PHYSICAL
+    jmp eax ;CODE_SEGMENT:KERNEL_PHYSICAL   ;jump to kernel
 
-;Padding and signature: the compiler executes this, not executed at runtime
+dap: ;Disk Adress Packet
+    db 0x10             ;DAP size
+    db 0x00             ;whatever this is
+    dw KERNEL_SECTORS   ;KERNEL_SECTORS is defined in the makefile, VSCode might complain
+    dw KERNEL_OFFSET
+    dw KERNEL_SEGMENT
+    dq 0                ;Initial LBA
+
+;Padding and signature
 times 510-($-$$) db 0
 db 0x55, 0xaa
