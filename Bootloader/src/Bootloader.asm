@@ -12,7 +12,7 @@
 KERNEL_SEGMENT  equ 0x1000
 KERNEL_OFFSET   equ 0x0000
 KERNEL_PHYSICAL equ (KERNEL_SEGMENT << 4) + KERNEL_OFFSET
-;KERNEL_SECTORS  equ 64
+;KERNEL_SECTORS  defined in makefile
 KERNEL_START    dq 1
 
 start:
@@ -43,10 +43,6 @@ loadkernel:
     ;pop ax
     ;int 0x13
 
-    ;----------------------------------------------------------------
-
-    ;TODO: Enable LBA adressing:
-
     ;Check for extensions
     mov ah, 0x41
     mov bx, 0x55aa
@@ -57,16 +53,16 @@ loadkernel:
     cmp bx, 0xaa55
     jne extensionerr
 
+    ;upon succes, load data
     mov bx, extmsg
     call printstr
 
     call .preparedap
     call .loadkernel_lba
 
+    jc diskerror   
 
     ;data is suposed to be loaded, tell the user
-    jc diskerror            
-
     push bx
     mov bx, kernelmsg       ;display that the kernel has been loaded into memory
     call printstr
