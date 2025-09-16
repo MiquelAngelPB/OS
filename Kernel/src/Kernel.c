@@ -1,5 +1,4 @@
-extern unsigned char readKey();
-extern void halt();
+#include "API.h"
 
 #define LINE_MAX_CHAR 100
 #define TOKEN_MAX_CHAR 11 //only 10 are used, the last one is a null character
@@ -20,6 +19,12 @@ char actualLine[LINE_MAX_CHAR] = {'\0'};
 int linePos = 0;
 char tokens[MAX_TOKENS][TOKEN_MAX_CHAR] = {'\0'};
 int commandMode = 1;
+
+char* errCodes[3] = {
+    "Everything is fine, you shouldn't be seeing this\n\0",
+    "There cannot be more than 10 commands/arguments in 1 instruction.\n\0",
+    "All commands/arguments must be less than 10 characters long.\n\0",
+};
 
 char scancodeToASCII[128] = {
     0,  27, '1','2','3','4','5','6','7','8','9','0','-', 0,'\b',
@@ -44,7 +49,6 @@ void readLine(char* str);
 void draw(char* target);
 void executeCommand();
 int tokenizeCommand(char* line);
-int cmpstr(char* str, char* str2);
 
 extern void kernelmain(void)
 {
@@ -78,6 +82,7 @@ extern void kernelmain(void)
             {
                 IsKeyPressed = 1;
                 putchar(ascii, commandMode);
+                moveCursor(row, col);
             }
         }
     }
@@ -206,6 +211,17 @@ void readLine(char* line)
     {
         executeCommand();
     }
+    else
+    {
+        char* errmsg = errCodes[error];
+        char* initialMsg = "Error \0";
+        char* initialMsg2 = ": \0";
+
+        print(initialMsg, 0);
+        putchar(error + '0', 0);
+        print(initialMsg2, 0);
+        print(errmsg, 0);
+    }
 }
 
 void executeCommand()
@@ -224,6 +240,7 @@ void executeCommand()
     else if (cmpstr(command, "text\0"))
     {
         commandMode = 0;
+        clear();
         char* msg = "Text mode activated, now you're trapped \n(haven't implemented a way to exit this mode yet)\n"
                     "Press TAB to change color.\n\n\0";
         print(msg, 0);
@@ -352,22 +369,14 @@ int tokenizeCommand(char* line)
                     charInToken = 0;
                     break;
                 }
-                else
-                {
-                    char* errmsg = "There cannot be more than 10 commands/arguments in 1 instruction.\n\0";
-                    return 1;
-                }
+                else { return 1; }
 
             case '\0':
                 return 0;
         
             default:
                 if (actualToken >= MAX_TOKENS)
-                {
-                    char* errmsg = "There cannot be more than 10 commands/arguments in 1 instruction.\n\0";
-                    return 1;
-                }
-                
+                { return 1; }
 
                 if (charInToken < TOKEN_MAX_CHAR - 1)
                 {
@@ -375,11 +384,7 @@ int tokenizeCommand(char* line)
                     charInToken++;
                     break;
                 }
-                else
-                {
-                    char* errmsg = "All commands/arguments must be less than 10 characters long.\n\0";
-                    return 1;
-                }
+                else { return 2; }
         }
     }
     return 0;
