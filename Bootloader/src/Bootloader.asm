@@ -68,6 +68,9 @@ loadkernel:
     call printstr
     pop bx
 
+    mov al, 0x13
+    int 0x10
+
     jmp protectedmode
 
 .preparedap:

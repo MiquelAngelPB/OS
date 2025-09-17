@@ -7,11 +7,9 @@ Flags_ASM = -f elf
 Bootloader_ASM = Bootloader/src/Bootloader.asm
 Bootloader_BIN = Bootloader/bin/Bootloader.bin
 #API
-Utilities_ASM = API/src/Utilities.asm
-Utilities_C = API/src/Utilities.c
-Utilities_ASM_O = API/bin/Utilities_asm.o
-Utilities_C_O = API/bin/Utilities_c.o
-Utilities_O = API/bin/Utilities.o
+API_SRC = API/src
+API_BIN = API/bin
+API_O = API/bin/Utilities.o
 API_H = API/src/API.h
 #Kernel entry
 KernelEntry_ASM = Kernel/src/KernelEntry.asm
@@ -21,6 +19,9 @@ Kernel_C = Kernel/src/Kernel.c
 Kernel_O = Kernel/bin/Kernel.o
 Kernel_ELF = Kernel/bin/Kernel.elf
 Kernel_BIN = Kernel/bin/Kernel.bin
+#Programs
+Console_C = Programs/src/Console.c
+Programs_O = Programs/bin/Programs.o
 #Others
 LinkerScript = LinkerScript.ld
 CrossCompiler = ../GCC-CrossCompiler/out/path/bin
@@ -41,15 +42,19 @@ kernel: kernelentry
 	#Thanks Andrew
 	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(Kernel_C) -o $(Kernel_O)
 
-linkkernel: $(LinkerScript) kernel API
-	$(CrossCompiler)/i686-elf-ld -T $(LinkerScript) -m elf_i386 $(KernelEntry_O) $(Utilities_O) $(Kernel_O) -o $(Kernel_ELF)
+linkkernel: $(LinkerScript) kernel API programs
+	$(CrossCompiler)/i686-elf-ld -T $(LinkerScript) -m elf_i386 $(KernelEntry_O) $(API_O) $(Programs_O) $(Kernel_O) -o $(Kernel_ELF)
 	$(CrossCompiler)/i686-elf-objcopy -O binary $(Kernel_ELF) $(Kernel_BIN)
 
-API: $(Utilities_ASM) $(Utilities_C)
-	nasm $(Flags_ASM) $(Utilities_ASM) -o $(Utilities_ASM_O)
-	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(Utilities_C) -o $(Utilities_C_O)
+API: $(API_SRC)/Utilities.asm $(API_SRC)/Utilities.c
+	nasm $(Flags_ASM) $(API_SRC)/Utilities.asm -o $(API_BIN)/Utilities_asm.o
+	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(API_SRC)/Utilities.c -o $(API_BIN)/Utilities_c.o
+	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(API_SRC)/Utilities_VGA.c -o $(API_BIN)/Utilities_VGA.o
 
-	$(CrossCompiler)/i686-elf-ld -r -m elf_i386 $(Utilities_ASM_O) $(Utilities_C_O) -o $(Utilities_O)
+	$(CrossCompiler)/i686-elf-ld -r -m elf_i386 $(API_BIN)/Utilities_asm.o $(API_BIN)/Utilities_c.o $(API_BIN)/Utilities_VGA.o -o $(API_O)
+
+programs:
+	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(Console_C) -o $(Programs_O)
 
 padding: $(Zeroes_ASM)
 	nasm $(Zeroes_ASM) -o $(Zeroes_BIN)
