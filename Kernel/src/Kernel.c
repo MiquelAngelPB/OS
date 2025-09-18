@@ -14,13 +14,13 @@ extern void kernelmain(void)
 
     char* string = "Welcome to the kernel! \n";
     char* string2 = "Type help for a list of commands!\n\n";
-    
+
     setColor(6);
-    print(title, 0);
+    print(title, 0, 0x00);
 
     setColor(8);
-    print(string, 0);
-    print(string2, 0);
+    print(string, 0, 0x00);
+    print(string2, 0, 0x00);
 
     consoleMain();
     while(1); //stop

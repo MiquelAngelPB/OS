@@ -7,6 +7,8 @@
 //console variables
 volatile char* buffer = (volatile char*)0xb8000;
 int color = 8;
+int showCursor = 1;
+char bgcolor = 0x00;
 char colors[10] = {
     0x0f, 0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08, 0x07, 0x06 //Source: https://wiki.osdev.org/Text_UI
 };
@@ -24,29 +26,31 @@ char* errCodes[3] = {
     "All commands/arguments must be less than 10 characters long.\n\0",
 };
 
-char scancodeToASCII[128] = {
-    0,  27, '1','2','3','4','5','6','7','8','9','0','-', 0,'\b',
-    '\t','q','w','e','r','t','y','u','i','o','p','[',']','\n', 0,
-    'a','s','d','f','g','h','j','k','l',';','\'','`',  0, '\\',
-    'z','x','c','v','b','n','m',',','.','/',  0, '*',  0, ' ',
-};
-
 //methods
 void clear();
-void print(char* str, int commandMode);
-void putchar(char c, int commandMode);
+void print(char* str, int commandMode, char bgColor);
+void putchar(char c, int commandMode, char bgColor);
 void readLine(char* str);
 void draw(char* target);
+void run(char* target);
 void executeCommand();
 int tokenizeCommand(char* line);
 
 void consoleMain()
 {
+    showCursor = 1;
+
     int IsKeyPressed = 0;
     while(1)
     {
-        char scancode;
+        if (showCursor)
+        {
+            putCharAt(row, col, '_', colors[color], 0x00);
+        }        
+
+        char scancode, ascii;
         scancode = readKey();
+        ascii = readKeyASCII();
 
         if (scancode & 0x80)
         {
@@ -56,11 +60,10 @@ void consoleMain()
 
         if (IsKeyPressed == 0)
         {
-            char ascii = scancodeToASCII[scancode];
             if (ascii)
             {
                 IsKeyPressed = 1;
-                putChar(ascii, commandMode);
+                putChar(ascii, commandMode, bgcolor);
                 moveCursor(row, col);
             }
         }
@@ -82,16 +85,16 @@ void clear()
     clearScreen();
 }
 
-void print(char* str, int commandMode)
+void print(char* str, int commandMode, char bgColor)
 {
     while (*str)
     {
-        putChar(*str, commandMode);
+        putChar(*str, commandMode, bgColor);
         str++;
     }
 }
 
-void putChar(char c, int commandMode)
+void putChar(char c, int commandMode,  char bgColor)
 {
     if (row >= TEXT_ROWS)
     {
@@ -108,6 +111,7 @@ void putChar(char c, int commandMode)
     switch (c)
     {
         case '\n':
+            putCharAt(row, col, '\0', 0x00, bgColor);
             col = 0;
             row++;
 
@@ -135,8 +139,8 @@ void putChar(char c, int commandMode)
         case '\b':
             if (col != 0)
             {
+                putCharAt(row, col, '\0', 0x00, bgColor);
                 col--;
-                putCharAt(row, col, ' ', 0x00);
             }
             
             if (commandMode)
@@ -159,7 +163,7 @@ void putChar(char c, int commandMode)
             break;
 
         default:
-            putCharAt(row, col, c, colors[color]);
+            putCharAt(row, col, c, colors[color], bgColor);
             col++;
 
             if (commandMode)
@@ -172,7 +176,7 @@ void putChar(char c, int commandMode)
                 else
                 {
                     char* errmsg = "That command is too long!\n\0";
-                    print(errmsg, 0);
+                    print(errmsg, 0, bgColor);
                 }
             }
 
@@ -193,10 +197,10 @@ void readLine(char* line)
         char* initialMsg = "Error \0";
         char* initialMsg2 = ": \0";
 
-        print(initialMsg, 0);
-        putChar(error + '0', 0);
-        print(initialMsg2, 0);
-        print(errmsg, 0);
+        print(initialMsg, 0, bgcolor);
+        putChar(error + '0', 0, bgcolor);
+        print(initialMsg2, 0, bgcolor);
+        print(errmsg, 0, bgcolor);
     }
 }
 
@@ -219,7 +223,11 @@ void executeCommand()
         clear();
         char* msg = "Text mode activated, now you're trapped \n(haven't implemented a way to exit this mode yet)\n"
                     "Press TAB to change color.\n\n\0";
-        print(msg, 0);
+        print(msg, 0, bgcolor);
+    } 
+    else if (cmpstr(command, "run\0"))
+    {
+        run(arg1);
     } 
     else if (cmpstr(command, "draw\0"))
     {
@@ -231,17 +239,18 @@ void executeCommand()
         "> clear\n"
         "> halt\n"
         "> text\n"
-        "> help\n"
-        "> draw\n";
-        print(msg, 0);
+        "> run\n"
+        "> draw\n"
+        "> help\n";
+        print(msg, 0, bgcolor);
     } 
     else 
     {
         char* errmsg = "That command doesnt exist! Type help for a list of commands.\n\0";
-        print(errmsg, 0);
+        print(errmsg, 0, bgcolor);
     }
     
-    putChar('\n', 0);
+    putChar('\n', 0, bgcolor);
 }
 
 void draw(char* target)
@@ -259,7 +268,7 @@ void draw(char* target)
         " #   #      #  \n"
         " #####  #####  \n"
         "               \n\n";
-        print(drawing, 0);
+        print(drawing, 0, bgcolor);
     }
     else if (cmpstr(target, "templeos\0"))
     {
@@ -285,7 +294,7 @@ void draw(char* target)
         "                             \n"
         "I was chosen by God because I am the best programmer on the planet\n and God boosted my IQ with divine intellect.\n -Terry A. Davis";
                                           
-        print(drawing, 0);
+        print(drawing, 0, bgcolor);
     }
     else if (cmpstr(target, "linux\0"))
     {
@@ -308,7 +317,7 @@ void draw(char* target)
         "_)      |.___.,|     .`\n"
         "|____   )MMMMMP|   .`\n"
         "     `-·       `--· \n";
-        print(drawing, 0);
+        print(drawing, 0, bgcolor);
     }
     else if (cmpstr(target, "help\0"))
     {
@@ -317,15 +326,37 @@ void draw(char* target)
         "> draw templeos\n"
         "> draw linux\n"
         "> draw help\n";
-        print(msg, 0);
+        print(msg, 0, bgcolor);
     }
     else
     {
         char* errmsg = "That's not a valid argument, type draw help for a list of drawings.\n\0";
-        print(errmsg, 0);
+        print(errmsg, 0, bgcolor);
     }
 
     color = tmpColor;
+}
+
+void run(char* target)
+{
+    int tmpColor = color;
+
+    if (cmpstr(target, "raycaster\0"))
+    {
+        raycasterMain();
+    }
+    else if (cmpstr(target, "help\0"))
+    {
+        char* msg = "You can run the following programs: \n"
+        "> run raycaster\n"
+        "> run help\n";
+        print(msg, 0, bgcolor);
+    }
+    else
+    {
+        char* errmsg = "That's not a valid argument, type run help for a list of programs.\n\0";
+        print(errmsg, 0, bgcolor);
+    }
 }
 
 int tokenizeCommand(char* line)

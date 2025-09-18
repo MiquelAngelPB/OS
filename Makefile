@@ -21,6 +21,8 @@ Kernel_ELF = Kernel/bin/Kernel.elf
 Kernel_BIN = Kernel/bin/Kernel.bin
 #Programs
 Console_C = Programs/src/Console.c
+Raycaster_C = Programs/src/Raycaster.c
+Programs_BIN = Programs/bin
 Programs_O = Programs/bin/Programs.o
 #Others
 LinkerScript = LinkerScript.ld
@@ -50,11 +52,15 @@ API: $(API_SRC)/Utilities.asm $(API_SRC)/Utilities.c
 	nasm $(Flags_ASM) $(API_SRC)/Utilities.asm -o $(API_BIN)/Utilities_asm.o
 	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(API_SRC)/Utilities.c -o $(API_BIN)/Utilities_c.o
 	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(API_SRC)/Utilities_VGA.c -o $(API_BIN)/Utilities_VGA.o
+	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(API_SRC)/Math.c -o $(API_BIN)/Math.o
 
-	$(CrossCompiler)/i686-elf-ld -r -m elf_i386 $(API_BIN)/Utilities_asm.o $(API_BIN)/Utilities_c.o $(API_BIN)/Utilities_VGA.o -o $(API_O)
+	$(CrossCompiler)/i686-elf-ld -r -m elf_i386 $(API_BIN)/Utilities_asm.o $(API_BIN)/Utilities_c.o $(API_BIN)/Utilities_VGA.o $(API_BIN)/Math.o -o $(API_O)
 
 programs:
-	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(Console_C) -o $(Programs_O)
+	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(Console_C) -o $(Programs_BIN)/Console.o
+	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(Raycaster_C) -o $(Programs_BIN)/Raycaster.o
+
+	$(CrossCompiler)/i686-elf-ld -r -m elf_i386 $(Programs_BIN)/Console.o $(Programs_BIN)/Raycaster.o -o $(Programs_O)
 
 padding: $(Zeroes_ASM)
 	nasm $(Zeroes_ASM) -o $(Zeroes_BIN)

@@ -270,22 +270,6 @@ const int cp437_font[256][8] = {
   {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // [ ] (255)
 };
 
-char readKey()
-{
-    return inpPort(0x60);
-}
-
-void moveCursor(short row, short col)
-{
-    //https://wiki.osdev.org/Text_Mode_Cursor
-    short i = row * 80 + col;
-
-    outPort(0x3D4, 0x0F);
-	outPort(0x3D5, (char) (i & 0xFF));
-	outPort(0x3D4, 0x0E);
-	outPort(0x3D5, (char) ((i >> 8) & 0xFF));
-}
-
 void clearScreen()
 {
     for (int x = 0; x < 320; x++)
@@ -297,7 +281,7 @@ void clearScreen()
     }
 }
 
-void putCharAt(unsigned int row, unsigned int col, char chr, char color)
+void putCharAt(unsigned int row, unsigned int col, char chr, char color, char bgColor)
 {
     row *= 8;
     col *= 8;
@@ -317,7 +301,7 @@ void putCharAt(unsigned int row, unsigned int col, char chr, char color)
             }
             else
             {
-                frameBuffer[(row + y) * 320 + (col + x)] = 0x00; // Black
+                frameBuffer[(row + y) * 320 + (col + x)] = bgColor; // Black
             }
         }
     }
