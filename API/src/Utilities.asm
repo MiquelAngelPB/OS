@@ -26,8 +26,8 @@ outPort:
 readMem:
     push ebp
     mov ebp, esp
-    mov eax, [ebp + 8]    ;16 bit address
-    mov dl, [eax]
+    mov bx, [ebp + 8]    ;16 bit address
+    mov dl, [bx]
     movzx eax, dl
     pop ebp
     ret
@@ -35,9 +35,9 @@ readMem:
 setMem:
     push ebp
     mov ebp, esp
-    mov eax, [ebp + 8]   ;16 bit address
+    mov bx, [ebp + 8]   ;16 bit address
     mov al, [ebp + 12]      ;8 bit value
-    mov [eax], al
+    mov [bx], al
     pop ebp
     ret
 
