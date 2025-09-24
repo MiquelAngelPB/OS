@@ -17,13 +17,16 @@ extern float sin[360];
 //Utilities.asm
 char inpPort(short port);
 void outPort(short port, char value);
+char readMem(short port);
+void setMem(short port, char value);
 void halt();
 
 //Utilities.c
 int cmpstr(char* str, char* str2);
 char readKey();
 char readKeyASCII();
-void moveCursor(short row, short col);
+void moveCursor(short row, short col); //only works on text mode
+int strToHex(char* str);
 
 //Utilities_VGA.c
 extern volatile unsigned char* const frameBuffer;

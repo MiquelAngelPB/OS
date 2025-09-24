@@ -35,6 +35,7 @@ void draw(char* target);
 void run(char* target);
 void executeCommand();
 int tokenizeCommand(char* line);
+void memory(char* inst, char* addr, char* val);
 
 void consoleMain()
 {
@@ -208,6 +209,9 @@ void executeCommand()
 {
     char* command = &tokens[0][0];
     char* arg1 = &tokens[1][0];
+    char* arg2 = &tokens[2][0];
+    char* arg3 = &tokens[3][0];
+    char* arg4 = &tokens[4][0];
 
     if (cmpstr(command, "clear\0"))
     {
@@ -233,10 +237,15 @@ void executeCommand()
     {
         draw(arg1);
     } 
+    else if (cmpstr(command, "memory\0"))
+    {
+        memory(arg1, arg2, arg3);
+    } 
     else if (cmpstr(command, "help\0"))
     {
         char* msg = "These are the commands: \n"
         "> clear\n"
+        "> memory\n"
         "> halt\n"
         "> text\n"
         "> run\n"
@@ -251,6 +260,19 @@ void executeCommand()
     }
     
     putChar('\n', 0, bgcolor);
+}
+
+void memory(char* inst, char* addr, char* val)
+{
+    if (cmpstr(inst, "set\0"))
+    {
+        setMem(strToHex(addr), (char)strToHex(val));
+        print("Done.\n", 0, 0x00);
+    }
+    else if (cmpstr(inst, "read\0"))
+    {
+        putChar(readMem(strToHex(addr)), 0, 0x00);
+    }
 }
 
 void draw(char* target)
