@@ -29,7 +29,7 @@ void moveCursor(short row, short col); //only works on text mode
 int strToHex(char* str);
 
 //Utilities_Audio.c
-void pc_speaker_demo();
+void beep();
 
 //Utilities_VGA.c
 extern volatile unsigned char* const frameBuffer;

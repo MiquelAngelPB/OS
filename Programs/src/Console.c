@@ -66,6 +66,7 @@ void consoleMain()
                 IsKeyPressed = 1;
                 putChar(ascii, commandMode, bgcolor);
                 moveCursor(row, col);
+                beep();
             }
         }
     }
@@ -164,6 +165,7 @@ void putChar(char c, int commandMode,  char bgColor)
             break;
 
         default:
+
             putCharAt(row, col, c, colors[color], bgColor);
             col++;
 
@@ -178,6 +180,7 @@ void putChar(char c, int commandMode,  char bgColor)
                 {
                     char* errmsg = "That command is too long!\n\0";
                     print(errmsg, 0, bgColor);
+                    beep();
                 }
             }
 
@@ -202,6 +205,7 @@ void readLine(char* line)
         putChar(error + '0', 0, bgcolor);
         print(initialMsg2, 0, bgcolor);
         print(errmsg, 0, bgcolor);
+        beep();
     }
 }
 
@@ -229,6 +233,7 @@ void executeCommand()
         char* msg = "Text mode activated, now you're trapped \n(haven't implemented a way to exit this mode yet)\n"
                     "Press TAB to change color.\n\n\0";
         print(msg, 0, bgcolor);
+        beep();
     } 
     else if (cmpstr(command, "run\0"))
     {
@@ -258,6 +263,7 @@ void executeCommand()
     {
         char* errmsg = "That command doesnt exist! Type help for a list of commands.\n\0";
         print(errmsg, 0, bgcolor);
+        beep();
     }
     
     putChar('\n', 0, bgcolor);
@@ -365,6 +371,7 @@ void draw(char* target, char* x, char* y, char* width, char* height)
     {
         char* errmsg = "That's not a valid argument, type draw help for a list of drawings.\n\0";
         print(errmsg, 0, bgcolor);
+        beep();
     }
 
     color = tmpColor;
@@ -389,6 +396,7 @@ void run(char* target)
     {
         char* errmsg = "That's not a valid argument, type run help for a list of programs.\n\0";
         print(errmsg, 0, bgcolor);
+        beep();
     }
 }
 

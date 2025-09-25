@@ -73,7 +73,7 @@ image: boot padding
 	cat $(Zeroes_BIN) >> $(IMG)
 
 run: image
-	qemu-system-x86_64 -drive format=raw,file=$(IMG) -monitor stdio
+	qemu-system-x86_64 -drive format=raw,file=$(IMG) -monitor stdio -audiodev pa,id=speaker -machine pcspk-audiodev=speaker
 	#qemu-system-i386
 
 clean:

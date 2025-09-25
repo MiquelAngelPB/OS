@@ -22,7 +22,7 @@ extern void kernelmain(void)
     print(string, 0, 0x00);
     print(string2, 0, 0x00);
 
-    pc_speaker_demo();
+    beep();
 
     consoleMain();
     while(1); //stop
