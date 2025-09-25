@@ -31,7 +31,7 @@ void clear();
 void print(char* str, int commandMode, char bgColor);
 void putchar(char c, int commandMode, char bgColor);
 void readLine(char* str);
-void draw(char* target);
+void draw(char* target, char* x, char* y, char* width, char* height);
 void run(char* target);
 void executeCommand();
 int tokenizeCommand(char* line);
@@ -212,6 +212,7 @@ void executeCommand()
     char* arg2 = &tokens[2][0];
     char* arg3 = &tokens[3][0];
     char* arg4 = &tokens[4][0];
+    char* arg5 = &tokens[5][0];
 
     if (cmpstr(command, "clear\0"))
     {
@@ -235,7 +236,7 @@ void executeCommand()
     } 
     else if (cmpstr(command, "draw\0"))
     {
-        draw(arg1);
+        draw(arg1, arg2, arg3, arg4, arg5);
     } 
     else if (cmpstr(command, "memory\0"))
     {
@@ -275,7 +276,7 @@ void memory(char* inst, char* addr, char* val)
     }
 }
 
-void draw(char* target)
+void draw(char* target, char* x, char* y, char* width, char* height)
 {
     int tmpColor = color;
 
@@ -347,8 +348,18 @@ void draw(char* target)
         "> draw logo\n"
         "> draw templeos\n"
         "> draw linux\n"
+        "> draw rectangle x y width height color\n"
         "> draw help\n";
         print(msg, 0, bgcolor);
+    }
+    else if (cmpstr(target, "rectangle\0"))
+    {
+        drawRectangle(
+            (unsigned short)strToHex(x), 
+            (unsigned short)strToHex(y), 
+            (unsigned short)strToHex(width), 
+            (unsigned short)strToHex(height), 
+            0x0F);
     }
     else
     {

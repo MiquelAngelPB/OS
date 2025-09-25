@@ -28,6 +28,9 @@ char readKeyASCII();
 void moveCursor(short row, short col); //only works on text mode
 int strToHex(char* str);
 
+//Utilities_Audio.c
+void pc_speaker_demo();
+
 //Utilities_VGA.c
 extern volatile unsigned char* const frameBuffer;
 void putCharAt(unsigned int row, unsigned int col, char chr, char color, char bgColor);

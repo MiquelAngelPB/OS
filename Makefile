@@ -52,9 +52,11 @@ API: $(API_SRC)/Utilities.asm $(API_SRC)/Utilities.c
 	nasm $(Flags_ASM) $(API_SRC)/Utilities.asm -o $(API_BIN)/Utilities_asm.o
 	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(API_SRC)/Utilities.c -o $(API_BIN)/Utilities_c.o
 	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(API_SRC)/Utilities_VGA.c -o $(API_BIN)/Utilities_VGA.o
+	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(API_SRC)/Utilities_Audio.c -o $(API_BIN)/Utilities_Audio.o
+	
 	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(API_SRC)/Math.c -o $(API_BIN)/Math.o
 
-	$(CrossCompiler)/i686-elf-ld -r -m elf_i386 $(API_BIN)/Utilities_asm.o $(API_BIN)/Utilities_c.o $(API_BIN)/Utilities_VGA.o $(API_BIN)/Math.o -o $(API_O)
+	$(CrossCompiler)/i686-elf-ld -r -m elf_i386 $(API_BIN)/Utilities_asm.o $(API_BIN)/Utilities_c.o $(API_BIN)/Utilities_VGA.o $(API_BIN)/Utilities_Audio.o $(API_BIN)/Math.o -o $(API_O)
 
 programs:
 	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(Console_C) -o $(Programs_BIN)/Console.o
