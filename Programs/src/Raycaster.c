@@ -5,6 +5,8 @@
 //variables
 int pixelsPerBlock = 10;
 
+int quit = 0;
+
 float px = 50;
 float py = 50;
 float pdx = 0;
@@ -16,7 +18,7 @@ const short map[MAP_SIZE * MAP_SIZE] = {
     1,0,0,0,0,0,0,1,
     1,1,0,0,0,0,0,1,
     1,0,0,0,0,0,0,1,
-    1,1,0,0,0,1,1,1,
+    1,1,1,0,0,1,1,1,
     1,0,1,1,0,1,0,1,
     1,0,0,0,0,0,0,1,
     1,1,1,1,1,1,1,1
@@ -27,6 +29,7 @@ void drawPlayer();
 void drawPlayerExtras();
 void drawMap();
 void manageInput();
+void castRay();
 
 void raycasterMain()
 {
@@ -35,9 +38,18 @@ void raycasterMain()
     showCursor = 0;
     print("Raycaster                Press q to quit\0", 0, 0x09);
 
+    //initialize player direction
+    pa = norm360(pa);
+    pdx = cos(pa);
+    pdy = sinTable[pa];
+
+    //main loop
     while (1)
     {
+        if (quit) { clear(); break; }
+
         manageInput();
+        castRay();
         drawMap();
         drawPlayer();
         drawPlayerExtras();
@@ -97,19 +109,24 @@ void manageInput()
     {
         pa = norm360(pa - 1);
         pdx = cos(pa);
-        pdy = sin[pa];
+        pdy = sinTable[pa];
     }
     if (k == 'd')
     {
         pa = norm360(pa + 1);
         pa %= 360;
         pdx = cos(pa);
-        pdy = sin[pa];
+        pdy = sinTable[pa];
     }
     if (k == 'q')
     {
-        clear();
         showCursor = 1;
-        consoleMain();
+        quit = 1;
     }
+}
+
+void castRay()
+{
+    float rayAngle;
+    float rayX, rayY;
 }

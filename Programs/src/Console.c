@@ -354,18 +354,36 @@ void draw(char* target, char* x, char* y, char* width, char* height)
         "> draw logo\n"
         "> draw templeos\n"
         "> draw linux\n"
-        "> draw rectangle x y width height color\n"
+        "> draw rectangle x y width height\n"
         "> draw help\n";
         print(msg, 0, bgcolor);
     }
     else if (cmpstr(target, "rectangle\0"))
     {
-        drawRectangle(
-            (unsigned short)strToHex(x), 
-            (unsigned short)strToHex(y), 
-            (unsigned short)strToHex(width), 
-            (unsigned short)strToHex(height), 
-            0x0F);
+        if (x && y && width && height)
+        {
+            unsigned short rx = (unsigned short)strToHex(x);
+            unsigned short ry = (unsigned short)strToHex(y);
+            unsigned short rw = (unsigned short)strToHex(width);
+            unsigned short rh = (unsigned short)strToHex(height);
+
+            if (rx && ry && rw && rh)
+            {
+                drawRectangle(rx, ry, rw, rh, 0x0F);
+            }
+            else
+            {
+                char* errmsg = "Invalid arguments, type draw help for help.\n\0";
+                print(errmsg, 0, bgcolor);
+                beep();
+            }
+        }
+        else
+        {
+            char* errmsg = "Not enough arguments, type draw help for help.\n\0";
+            print(errmsg, 0, bgcolor);
+            beep();
+        }
     }
     else
     {

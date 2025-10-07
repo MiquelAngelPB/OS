@@ -2,28 +2,7 @@
 
 #define PI 3.14159265358979323846
 
-float degToRad(float degrees)
-{
-    return degrees * (PI / 180.0);
-}
-
-float cos(int a)
-{
-    return sin[(a + 90) % 360];
-}
-
-float tan(int a)
-{
-    return sin[a] / cos(a);
-}
-
-int norm360(int a) {
-    a %= 360;
-    if (a < 0) { a += 360; }
-    return a;
-}
-
-float sin[360] = {
+float sinTable[360] = {
     0.00000, 0.01745, 0.03490, 0.05234, 0.06976, 0.08716, 0.10453, 0.12187, 
     0.13917, 0.15643, 0.17365, 0.19081, 0.20791, 0.22495, 0.24192, 0.25882, 
     0.27564, 0.29237, 0.30902, 0.32557, 0.34202, 0.35837, 0.37461, 0.39073, 
@@ -71,3 +50,27 @@ float sin[360] = {
     -0.19081, -0.17365, -0.15643, -0.13917, -0.12187, -0.10453, -0.08716, -0.06976, 
     -0.05234, -0.03490, -0.01745
 };
+
+float degToRad(float degrees) { return degrees * (PI / 180); }
+float radToDeg(float radians) { return radians * (180 / PI); }
+
+float sin(int a)
+{
+    sinTable[a];
+}
+
+float cos(int a)
+{
+    return sinTable[(a + 90) % 360];
+}
+
+float tan(int a)
+{
+    return sinTable[a] / cos(a);
+}
+
+int norm360(int a) {
+    a %= 360;
+    if (a < 0) { a += 360; }
+    return a;
+}

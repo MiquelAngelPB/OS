@@ -10,7 +10,7 @@
     //Set the PIT to the desired frequency
  	Div = 1193180 / nFrequence;
  	outPort(0x43, 0xb6);
- 	outPort(0x42, (char) (Div) );
+ 	outPort(0x42, (char) (Div));
  	outPort(0x42, (char) (Div >> 8));
  
     //And play the sound using the PC speaker
