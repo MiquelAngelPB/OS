@@ -13,8 +13,9 @@ float radToDeg(float radians);
 float sin(int a);
 float cos(int a);
 float tan(int a);
-extern float sinTable[360];
 int norm360(int a);
+float abs(float x);
+float frac(float x);
 
 //Utilities.asm
 char inpPort(short port);

@@ -1,17 +1,23 @@
 #include "API.h"
 
 #define MAP_SIZE 8
+#define MAP_OFFSET_X 15
+#define MAP_OFFSET_Y 16 + 15
 
 //variables
 int pixelsPerBlock = 10;
 
 int quit = 0;
 
-float px = 50;
-float py = 50;
+float px = 4;
+float py = 3;
 float pdx = 0;
 float pdy = 0;
 int pa = 0;
+
+//debugging
+float debugX = 0;
+float debugY = 0;
 
 const short map[MAP_SIZE * MAP_SIZE] = { 
     1,1,1,1,1,1,1,1,
@@ -31,17 +37,22 @@ void drawMap();
 void manageInput();
 void castRay();
 
-void raycasterMain()
+void drawWindow()
 {
     clear();
     drawRectangle(0, 0, SCREEN_WIDTH, 16, 0x09);
     showCursor = 0;
     print("Raycaster                Press q to quit\0", 0, 0x09);
+}
+
+void raycasterMain()
+{
+    drawWindow();
 
     //initialize player direction
     pa = norm360(pa);
     pdx = cos(pa);
-    pdy = sinTable[pa];
+    pdy = sin(pa);
 
     //main loop
     while (1)
@@ -49,7 +60,7 @@ void raycasterMain()
         if (quit) { clear(); break; }
 
         manageInput();
-        castRay();
+        castRay(pa);
         drawMap();
         drawPlayer();
         drawPlayerExtras();
@@ -60,14 +71,14 @@ void raycasterMain()
 
 void drawMap()
 {
-    int offsetX = 15;
-    int offsetY = 16 + 15;
+    int offsetX = MAP_OFFSET_X;
+    int offsetY = MAP_OFFSET_Y;
 
     for (int x = 0; x < MAP_SIZE; x++)
     {
         for (int y = 0; y < MAP_SIZE; y++)
         {
-            int i = x * MAP_SIZE + y;
+            int i = y * MAP_SIZE + x;
             if (map[i])
             {
                 drawRectangle(offsetX + x * pixelsPerBlock, offsetY + y * pixelsPerBlock, pixelsPerBlock, pixelsPerBlock, 0x0F);
@@ -82,12 +93,13 @@ void drawMap()
 
 void drawPlayer()
 {
-    frameBuffer[ (int)(py) * SCREEN_WIDTH + (int)(px) ] = 0x0E;
+    frameBuffer[ (int)(py * pixelsPerBlock + MAP_OFFSET_Y) * SCREEN_WIDTH + (int)(px * pixelsPerBlock + MAP_OFFSET_X) ] = 0x0E;
 }
 
 void drawPlayerExtras()
 {
-    frameBuffer[ (int)(py + pdy * 5) * SCREEN_WIDTH + (int)(px + pdx * 5) ] = 0x0F;
+    frameBuffer[ (int)((py * pixelsPerBlock) + pdy * 5 + MAP_OFFSET_Y) * SCREEN_WIDTH + (int)((px * pixelsPerBlock) + pdx * 5 + MAP_OFFSET_X) ] = 0x0F;
+    frameBuffer[ (int)(debugY * pixelsPerBlock + MAP_OFFSET_Y) * SCREEN_WIDTH + (int)(debugX * pixelsPerBlock + MAP_OFFSET_X) ] = 0x0A;
 }
 
 void manageInput()
@@ -97,26 +109,26 @@ void manageInput()
 
     if (k == 'w')
     {
-        px += pdx * 0.1;
-        py += pdy * 0.1;
+        px += pdx * 0.01;
+        py += pdy * 0.01;
     }
     if (k == 's')
     {
-        px -= pdx * 0.1;
-        py -= pdy * 0.1;
+        px -= pdx * 0.01;
+        py -= pdy * 0.01;
     }
     if (k == 'a')
     {
         pa = norm360(pa - 1);
         pdx = cos(pa);
-        pdy = sinTable[pa];
+        pdy = sin(pa);
     }
     if (k == 'd')
     {
         pa = norm360(pa + 1);
         pa %= 360;
         pdx = cos(pa);
-        pdy = sinTable[pa];
+        pdy = sin(pa);
     }
     if (k == 'q')
     {
@@ -125,8 +137,66 @@ void manageInput()
     }
 }
 
-void castRay()
+void castRay(int a)
 {
     float rayAngle;
-    float rayX, rayY;
+    float dx, dy;
+    float hitX, hitY;
+    float signX = dx < 0 ? -1 : 1;
+    float signY = dy < 0 ? -1 : 1;
+
+    //calculate ray direction and signs
+
+    dx = cos(a);
+    dy = sin(a);
+
+    float fx = frac(px);
+    float fy = frac(py);
+
+    float distX0, distY0;
+    float dDistX = abs(1.0 / dx);
+    float dDistY = abs(1.0 / dy);
+
+    if (dx > 0)
+    {
+        distX0 = (1 - fx);
+    }
+    else
+    {
+        distX0 = fx;
+    }
+
+    if (dy > 0)
+    {
+        distY0 = (1 - fy);
+    }
+    else
+    {
+        distY0 = fy;
+    }
+
+    float sideDistX = distX0 * dDistX;
+    float sideDistY = distY0 * dDistY;
+
+    int nextX = (int)px;
+    int nextY = (int)py;
+    debugX = nextX;
+    debugY = nextY;
+
+    while (!map[nextY * MAP_SIZE + nextX])
+    {
+        if (sideDistX < sideDistY)
+        {
+            sideDistX += dDistX;
+            nextX += signX;
+        }
+        else
+        {
+            sideDistY += dDistY;
+            nextY += signY;
+        }
+
+        debugX = nextX;
+        debugY = nextY;
+    }
 }
