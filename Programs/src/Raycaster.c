@@ -3,6 +3,9 @@
 #define MAP_SIZE 8
 #define MAP_OFFSET_X 15
 #define MAP_OFFSET_Y 16 + 15
+#define SCREEN_OFFSET_X 100
+#define SCREEN_OFFSET_Y 16 + 15
+#define N_RAYS 32
 
 //variables
 int pixelsPerBlock = 10;
@@ -35,7 +38,8 @@ void drawPlayer();
 void drawPlayerExtras();
 void drawMap();
 void manageInput();
-void castRay();
+void castRay(int a, int offset);
+void drawColumn(int offset, int height, char color);
 
 void drawWindow()
 {
@@ -59,8 +63,16 @@ void raycasterMain()
     {
         if (quit) { clear(); break; }
 
+        clear();
         manageInput();
-        castRay(pa);
+
+        int a = pa;
+        for (int i = 0; i < N_RAYS; i++)
+        {
+            a += 3;
+            castRay(norm360(pa + a), i);
+        }
+
         drawMap();
         drawPlayer();
         drawPlayerExtras();
@@ -137,27 +149,28 @@ void manageInput()
     }
 }
 
-void castRay(int a)
+void castRay(int a, int offset)
 {
     float rayAngle;
     float dx, dy;
     float hitX, hitY;
-    float signX = dx < 0 ? -1 : 1;
-    float signY = dy < 0 ? -1 : 1;
 
     //calculate ray direction and signs
 
     dx = cos(a);
     dy = sin(a);
 
+    float signX = dx < 0 ? -1 : 1;
+    float signY = dy < 0 ? -1 : 1;
+
+    int mapX = (int)px;
+    int mapY = (int)py;
     float fx = frac(px);
     float fy = frac(py);
 
     float distX0, distY0;
-    float dDistX = abs(1.0 / dx);
-    float dDistY = abs(1.0 / dy);
 
-    if (dx > 0)
+    if (signX == 1)
     {
         distX0 = (1 - fx);
     }
@@ -166,7 +179,7 @@ void castRay(int a)
         distX0 = fx;
     }
 
-    if (dy > 0)
+    if (signY == 1)
     {
         distY0 = (1 - fy);
     }
@@ -175,28 +188,45 @@ void castRay(int a)
         distY0 = fy;
     }
 
-    float sideDistX = distX0 * dDistX;
-    float sideDistY = distY0 * dDistY;
+    float tx = distX0 / abs(dx);
+    float ty = distY0 / abs(dy);
 
-    int nextX = (int)px;
-    int nextY = (int)py;
-    debugX = nextX;
-    debugY = nextY;
+    int t = 0;
 
-    while (!map[nextY * MAP_SIZE + nextX])
+    //main loop
+    while (!map[mapY * MAP_SIZE + mapX])
     {
-        if (sideDistX < sideDistY)
+        //Vertical lines: x(t) = px + dx*t and y = exactly the vertical line
+        //or
+        //Horizontal lines: y(t) = py + dy*t and x = exactly the horizontal line
+
+        if (tx < ty)
         {
-            sideDistX += dDistX;
-            nextX += signX;
+            hitX = mapX + (signX == 1 ? 1 : 0);
+            hitY = py + dy * tx;
+
+            mapX += (int)signX;
+            tx = distX0 / abs(dx);
+            t += tx;
         }
         else
         {
-            sideDistY += dDistY;
-            nextY += signY;
-        }
+            hitX = px + dx * ty;
+            hitY = mapY + (signY == 1 ? 1 : 0);
 
-        debugX = nextX;
-        debugY = nextY;
+            mapY += (int)signY;
+            ty = distY0 / abs(dy);
+            t += ty;
+        }
     }
+
+    debugX =  hitX;
+    debugY =  hitY;
+
+    drawColumn(offset, t, 0x0F);
+}
+
+void drawColumn(int offset, int height, char color)
+{
+    drawRectangle(SCREEN_OFFSET_X + offset, SCREEN_OFFSET_Y, 3, height, color);
 }

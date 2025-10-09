@@ -16,6 +16,7 @@ float tan(int a);
 int norm360(int a);
 float abs(float x);
 float frac(float x);
+float lerp(float a, float b, float t);
 
 //Utilities.asm
 char inpPort(short port);

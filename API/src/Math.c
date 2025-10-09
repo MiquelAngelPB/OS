@@ -81,3 +81,4 @@ int norm360(int a) {
 
 float abs(float x)   { return x < 0 ? -x : x;    }
 float frac(float x)  { return x - (int)x;        }
+float lerp(float a, float b, float t) { return a + t * (b - a); }
