@@ -5,7 +5,7 @@
 #define MAP_OFFSET_Y 16 + 15
 #define SCREEN_OFFSET_X 100
 #define SCREEN_OFFSET_Y 16 + 15
-#define N_RAYS 32
+#define N_RAYS 1
 
 //variables
 int pixelsPerBlock = 10;
@@ -38,7 +38,7 @@ void drawPlayer();
 void drawPlayerExtras();
 void drawMap();
 void manageInput();
-void castRay(int a, int offset);
+void castRay(int a);
 void drawColumn(int offset, int height, char color);
 
 void drawWindow()
@@ -63,15 +63,8 @@ void raycasterMain()
     {
         if (quit) { clear(); break; }
 
-        clear();
         manageInput();
-
-        int a = pa;
-        for (int i = 0; i < N_RAYS; i++)
-        {
-            a += 3;
-            castRay(norm360(pa + a), i);
-        }
+        castRay(norm360(pa));
 
         drawMap();
         drawPlayer();
@@ -149,7 +142,7 @@ void manageInput()
     }
 }
 
-void castRay(int a, int offset)
+void castRay(int a)
 {
     float rayAngle;
     float dx, dy;
@@ -191,8 +184,6 @@ void castRay(int a, int offset)
     float tx = distX0 / abs(dx);
     float ty = distY0 / abs(dy);
 
-    int t = 0;
-
     //main loop
     while (!map[mapY * MAP_SIZE + mapX])
     {
@@ -206,8 +197,7 @@ void castRay(int a, int offset)
             hitY = py + dy * tx;
 
             mapX += (int)signX;
-            tx = distX0 / abs(dx);
-            t += tx;
+            tx += distX0 / abs(dx);
         }
         else
         {
@@ -215,15 +205,12 @@ void castRay(int a, int offset)
             hitY = mapY + (signY == 1 ? 1 : 0);
 
             mapY += (int)signY;
-            ty = distY0 / abs(dy);
-            t += ty;
+            ty += distY0 / abs(dy);
         }
     }
 
     debugX =  hitX;
     debugY =  hitY;
-
-    drawColumn(offset, t, 0x0F);
 }
 
 void drawColumn(int offset, int height, char color)
