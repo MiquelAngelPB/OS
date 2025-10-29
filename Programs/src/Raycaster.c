@@ -64,7 +64,12 @@ void raycasterMain()
         if (quit) { clear(); break; }
 
         manageInput();
-        castRay(norm360(pa));
+
+        for (int a = N_RAYS - N_RAYS / 2; a < N_RAYS; a++)
+        {
+            castRay(norm360(pa + a));
+        }
+        
 
         drawMap();
         drawPlayer();
@@ -163,6 +168,7 @@ void castRay(int a)
 
     float distX0, distY0;
 
+    //first cell
     if (signX == 1)
     {
         distX0 = (1 - fx);
@@ -183,8 +189,17 @@ void castRay(int a)
 
     float tx = distX0 / abs(dx);
     float ty = distY0 / abs(dy);
-
+    
     //main loop
+    if (signX == 1)
+    {
+        distX0 = (1 - fx);
+    }
+    else
+    {
+        distX0 = fx;
+    }
+
     while (!map[mapY * MAP_SIZE + mapX])
     {
         //Vertical lines: x(t) = px + dx*t and y = exactly the vertical line
@@ -197,7 +212,7 @@ void castRay(int a)
             hitY = py + dy * tx;
 
             mapX += (int)signX;
-            tx += distX0 / abs(dx);
+            tx += 1 / abs(dx);
         }
         else
         {
@@ -205,12 +220,9 @@ void castRay(int a)
             hitY = mapY + (signY == 1 ? 1 : 0);
 
             mapY += (int)signY;
-            ty += distY0 / abs(dy);
+            ty += 1 / abs(dy);
         }
     }
-
-    debugX =  hitX;
-    debugY =  hitY;
 }
 
 void drawColumn(int offset, int height, char color)
