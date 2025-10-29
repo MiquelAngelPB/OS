@@ -5,7 +5,7 @@
 #define MAP_OFFSET_Y 16 + 15
 #define SCREEN_OFFSET_X 100
 #define SCREEN_OFFSET_Y 16 + 15
-#define N_RAYS 1
+#define N_RAYS 64
 
 //variables
 int pixelsPerBlock = 10;
@@ -40,6 +40,7 @@ void drawMap();
 void manageInput();
 void castRay(int a);
 void drawColumn(int offset, int height, char color);
+void clearGameScreen();
 
 void drawWindow()
 {
@@ -59,17 +60,15 @@ void raycasterMain()
     pdy = sin(pa);
 
     //main loop
-    while (1)
+    while (!quit)
     {
-        if (quit) { clear(); break; }
-
+        clear();
         manageInput();
 
         for (int a = N_RAYS - N_RAYS / 2; a < N_RAYS; a++)
         {
             castRay(norm360(pa + a));
         }
-        
 
         drawMap();
         drawPlayer();
@@ -77,6 +76,8 @@ void raycasterMain()
 
         for (int i = 0; i < 1000000; i++) { }
     }
+
+    clear();
 }
 
 void drawMap()
@@ -223,9 +224,16 @@ void castRay(int a)
             ty += 1 / abs(dy);
         }
     }
-}
+
+    drawColumn((a - pa) * 3, 100 - (tx + ty), 0x0C);
+}   
 
 void drawColumn(int offset, int height, char color)
 {
     drawRectangle(SCREEN_OFFSET_X + offset, SCREEN_OFFSET_Y, 3, height, color);
+}
+
+void clearGameScreen()
+{
+    drawRectangle(SCREEN_OFFSET_X, SCREEN_OFFSET_Y, SCREEN_WIDTH - SCREEN_OFFSET_X, SCREEN_HEIGHT - SCREEN_OFFSET_Y, 0x00);
 }
