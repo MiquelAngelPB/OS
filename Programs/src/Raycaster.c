@@ -84,6 +84,7 @@ void raycasterMain()
         }
 
         for (int i = 0; i < 1000000; i++) { }
+        render();
     }
 
     clear();
@@ -113,13 +114,13 @@ void drawMap()
 
 void drawPlayer()
 {
-    frameBuffer[ (int)(py * pixelsPerBlock + MAP_OFFSET_Y) * SCREEN_WIDTH + (int)(px * pixelsPerBlock + MAP_OFFSET_X) ] = 0x0E;
+    backBuffer[ (int)(py * pixelsPerBlock + MAP_OFFSET_Y) * SCREEN_WIDTH + (int)(px * pixelsPerBlock + MAP_OFFSET_X) ] = 0x0E;
 }
 
 void drawPlayerExtras()
 {
-    frameBuffer[ (int)((py * pixelsPerBlock) + pdy * 5 + MAP_OFFSET_Y) * SCREEN_WIDTH + (int)((px * pixelsPerBlock) + pdx * 5 + MAP_OFFSET_X) ] = 0x0F;
-    //frameBuffer[ (int)(debugY * pixelsPerBlock + MAP_OFFSET_Y) * SCREEN_WIDTH + (int)(debugX * pixelsPerBlock + MAP_OFFSET_X) ] = 0x0A;
+    backBuffer[(int)((py * pixelsPerBlock) + pdy * 5 + MAP_OFFSET_Y) * SCREEN_WIDTH + (int)((px * pixelsPerBlock) + pdx * 5 + MAP_OFFSET_X) ] = 0x0F;
+    //backBuffer[ (int)(debugY * pixelsPerBlock + MAP_OFFSET_Y) * SCREEN_WIDTH + (int)(debugX * pixelsPerBlock + MAP_OFFSET_X) ] = 0x0A;
 }
 
 void drawScreen()
@@ -258,6 +259,7 @@ void castRay(int a)
         }
     }
 
+    //float tFixed = t * cos(a - pa); //remove fishbowl effect
     drawColumn((a - pa) * 3, 100 - (t * VERTICALITY), wallSide ? 0x04 : 0x0C);
 }   
 

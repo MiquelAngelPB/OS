@@ -36,10 +36,11 @@ int strToHex(char* str);
 void beep();
 
 //Utilities_VGA.c
-extern volatile unsigned char* const frameBuffer;
+extern unsigned char backBuffer[64000];
 void putCharAt(unsigned int row, unsigned int col, char chr, char color, char bgColor);
 void drawRectangle(unsigned short x, unsigned short y, unsigned short width, unsigned short height, char color);
 void clearScreen();
+void render();
 
 //Console.c
 extern int showCursor;

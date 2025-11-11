@@ -3,7 +3,8 @@
 // first 4 bytes: line. Last 4 bytes: column.
 //https://upload.wikimedia.org/wikipedia/commons/4/49/VGA_palette.svg
 //From: https://stackoverflow.com/questions/22052973/256-color-chart-for-mode-13h
-volatile unsigned char* const frameBuffer = (unsigned char*)0xA0000; 
+volatile unsigned char* const frameBuffer = (unsigned char*)0xA0000;
+unsigned char backBuffer[64000];
 
 // ----------------------------------------------------------------
 // https://github.com/susam/pcface/blob/main/out/oldschool-bios-8x8/fontlist.js
@@ -272,13 +273,8 @@ const int cp437_font[256][8] = {
 
 void clearScreen()
 {
-    for (int x = 0; x < 320; x++)
-    {
-        for (int y = 0; y < 200; y++)
-        {
-            frameBuffer[y * 320 + x] = 0x00; // Black
-        }
-    }
+    for (int i = 0; i < 64000; i++) backBuffer[i] = 0x00;
+    render();
 }
 
 void putCharAt(unsigned int row, unsigned int col, char chr, char color, char bgColor)
@@ -297,11 +293,11 @@ void putCharAt(unsigned int row, unsigned int col, char chr, char color, char bg
             int mask = 0x80 >> x;
             if (mask & val)
             {
-                frameBuffer[(row + y) * 320 + (col + x)] = color; // White
+                backBuffer[(row + y) * 320 + (col + x)] = color; // White
             }
             else
             {
-                frameBuffer[(row + y) * 320 + (col + x)] = bgColor; // Black
+                backBuffer[(row + y) * 320 + (col + x)] = bgColor; // Black
             }
         }
     }
@@ -315,7 +311,17 @@ void drawRectangle(unsigned short x, unsigned short y, unsigned short width, uns
     {
         for (unsigned short j = 0; j < height; j++)
         {
-            frameBuffer[(y + j) * 320 + (x + i)] = color;
+            backBuffer[(y + j) * 320 + (x + i)] = color;
         }
+    }
+}
+
+void render() {
+    int* src = (int*)backBuffer;
+    int* dst = (int*)frameBuffer;
+
+    for (int i = 0; i < 16000; i++)
+    {
+        dst[i] = src[i];
     }
 }

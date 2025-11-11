@@ -66,9 +66,10 @@ void consoleMain()
                 IsKeyPressed = 1;
                 putChar(ascii, commandMode, bgcolor);
                 moveCursor(row, col);
-                beep();
             }
         }
+
+        render();
     }
 
     while(1); //stop
@@ -183,7 +184,6 @@ void putChar(char c, int commandMode,  char bgColor)
                     beep();
                 }
             }
-
             break;
     }
 }
