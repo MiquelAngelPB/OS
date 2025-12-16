@@ -20,8 +20,8 @@ Kernel_O = Kernel/bin/Kernel.o
 Kernel_ELF = Kernel/bin/Kernel.elf
 Kernel_BIN = Kernel/bin/Kernel.bin
 #Programs
-Console_C = Programs/src/Console.c
-Raycaster_C = Programs/src/Raycaster.c
+Console_C = Programs/src/Console/Console.c
+Raycaster_C = Programs/src/Raycaster/Raycaster.c
 Programs_BIN = Programs/bin
 Programs_O = Programs/bin/Programs.o
 #Others
@@ -29,7 +29,7 @@ LinkerScript = LinkerScript.ld
 CrossCompiler = ../GCC-CrossCompiler/out/path/bin
 Zeroes_ASM = Kernel/src/Zeroes.asm
 Zeroes_BIN = Kernel/bin/Zeroes.bin
-IMG = img/os.img
+IMG = Img/os.img
 
 Kernel_SECTORS = $(shell bytes=$$(stat -c%s $(Kernel_BIN)); echo $$(( (bytes + 511) / 512 )))
 

@@ -1,4 +1,5 @@
 #include "API.h"
+#include "Console.h"
 
 #define MAP_SIZE 8
 #define MAP_OFFSET_X 15
@@ -47,10 +48,12 @@ void drawScreen();
 
 void drawWindow()
 {
-    clear();
+    clearConsole();
     drawRectangle(0, 0, SCREEN_WIDTH, 16, 0x09);
-    showCursor = 0;
-    print("Raycaster                Press q to quit\0", 0, 0x09);
+
+    setBGColor(0x09);
+    setCursorVisibility(0);
+    print("Raycaster                Press q to quit\0");
 }
 
 void raycasterMain()
@@ -87,7 +90,7 @@ void raycasterMain()
         render();
     }
 
-    clear();
+    clearConsole();
 }
 
 void drawMap()
@@ -169,7 +172,7 @@ void manageInput()
     }
     if (k == 'q')
     {
-        showCursor = 1;
+        setCursorVisibility(1);
         quit = 1;
     }
 }

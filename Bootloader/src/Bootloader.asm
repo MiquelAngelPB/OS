@@ -8,7 +8,6 @@
 [ORG 0x7c00]
 [bits 16]
 
-
 KERNEL_SEGMENT  equ 0x1000
 KERNEL_OFFSET   equ 0x0000
 KERNEL_PHYSICAL equ (KERNEL_SEGMENT << 4) + KERNEL_OFFSET
@@ -30,19 +29,6 @@ initializestack:
     jmp loadkernel
 
 loadkernel:
-    ;mov ah, 0x02            ;read (block writing permissions)
-    ;mov al, 54              ;number of sectors (starts at 1)
-    ;mov ch, 0               ;cylinder
-    ;mov cl, 2               ;Sector inside the cylinder (starts at 1)
-    ;mov dh, 0               ;head
-    ;mov dl, [bootdrive]     ;disk, will use the one that the BIOS gives you
-    ;mov bx, KERNEL_ADDRESS  ;destination es:bx
-    ;push ax
-    ;mov ax, 0x0000          ;temporal value for es
-    ;mov es, ax              ;destination es:bx
-    ;pop ax
-    ;int 0x13
-
     ;Check for extensions
     mov ah, 0x41
     mov bx, 0x55aa
@@ -90,7 +76,7 @@ loadkernel:
     mov bx, KERNEL_OFFSET
 
     mov dl, [bootdrive]
-    mov si, dap ; DS:SI --> DAP adress (DS is alredy set by the BIOS)
+    mov si, dap ; DS:SI --> DAP adress (DS is alredy set by the BIOS at the start)
 
     mov ah, 0x42
     int 0x13

@@ -1,3 +1,4 @@
+#include "Console.h"
 #include "API.h"
 
 char* title = " \n"
@@ -10,17 +11,17 @@ char* title = " \n"
 
 extern void kernelmain(void)
 {
-    clear();
+    clearConsole();
 
     char* string = "Welcome to the kernel! \n";
     char* string2 = "Type help for a list of commands!\n\n";
 
-    setColor(6);
-    print(title, 0, 0x00);
+    setColor(0x08);
+    setBGColor(0x00);
 
-    setColor(8);
-    print(string, 0, 0x00);
-    print(string2, 0, 0x00);
+    print(title);
+    print(string);
+    print(string2);
 
     render();
     consoleMain();

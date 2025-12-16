@@ -1,199 +1,33 @@
-#include "API.h"
-
 #define LINE_MAX_CHAR 100
 #define TOKEN_MAX_CHAR 11 //only 10 are used, the last one is a null character
 #define MAX_TOKENS 10
 
-//console variables
-volatile char* buffer = (volatile char*)0xb8000;
-int color = 8;
-int showCursor = 1;
-char bgcolor = 0x00;
-char colors[10] = {
-    0x0f, 0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08, 0x07, 0x06 //Source: https://wiki.osdev.org/Text_UI
-};
-int col = 0;
-int row = 0;
-
-char actualLine[LINE_MAX_CHAR] = {'\0'};
-int linePos = 0;
-char tokens[MAX_TOKENS][TOKEN_MAX_CHAR] = {'\0'};
-int commandMode = 1;
-
+//variables
 char* errCodes[3] = {
     "Everything is fine, you shouldn't be seeing this\n\0",
     "There cannot be more than 10 commands/arguments in 1 instruction.\n\0",
     "All commands/arguments must be less than 10 characters long.\n\0",
 };
 
+char tokens[MAX_TOKENS][TOKEN_MAX_CHAR] = {'\0'};
+char actualLine[LINE_MAX_CHAR] = {'\0'};
+
 //methods
-void clear();
-void print(char* str, int commandMode, char bgColor);
-void putchar(char c, int commandMode, char bgColor);
-void readLine(char* str);
+void compile(char* line);
 void draw(char* target, char* x, char* y, char* width, char* height);
 void run(char* target);
 void executeCommand();
 int tokenizeCommand(char* line);
 void memory(char* inst, char* addr, char* val);
+void cleanTokens();
 
-void consoleMain()
-{
-    showCursor = 1;
-
-    int IsKeyPressed = 0;
-    while(1)
-    {
-        if (showCursor)
-        {
-            putCharAt(row, col, '_', colors[color], 0x00);
-        }        
-
-        char scancode, ascii;
-        scancode = readKey();
-        ascii = readKeyASCII();
-
-        if (scancode & 0x80)
-        {
-            IsKeyPressed = 0;
-            continue;
-        }
-
-        if (IsKeyPressed == 0)
-        {
-            if (ascii)
-            {
-                IsKeyPressed = 1;
-                putChar(ascii, commandMode, bgcolor);
-                moveCursor(row, col);
-            }
-        }
-
-        render();
-    }
-
-    while(1); //stop
-}
-
-void setColor(int c)
-{
-    color = c;
-}
-
-void clear()
-{
-    col = 0;
-    row = 0;
-
-    clearScreen();
-}
-
-void print(char* str, int commandMode, char bgColor)
-{
-    while (*str)
-    {
-        putChar(*str, commandMode, bgColor);
-        str++;
-    }
-}
-
-void putChar(char c, int commandMode,  char bgColor)
-{
-    if (row >= TEXT_ROWS)
-    {
-        clear();
-    }
-
-    if (col >= TEXT_COLS)
-    {
-        col = 0;
-        row++;
-    }
-
-    int i = (TEXT_COLS * row + col) * 2;
-    switch (c)
-    {
-        case '\n':
-            putCharAt(row, col, '\0', 0x00, bgColor);
-            col = 0;
-            row++;
-
-            if (commandMode == 1)
-            {
-                linePos = 0;
-                for (int t = 0; t < MAX_TOKENS; t++)
-                {
-                    for (int c = 0; c < TOKEN_MAX_CHAR; c++)
-                    {
-                        tokens[t][c] = '\0';
-                    }
-                }
-                
-                readLine(actualLine);
-                for (int i = 0; i < LINE_MAX_CHAR; i++)
-                {
-                    actualLine[i] = '\0';
-                }
-                
-            }
-
-            break;
-
-        case '\b':
-            if (col != 0)
-            {
-                putCharAt(row, col, '\0', 0x00, bgColor);
-                col--;
-            }
-            
-            if (commandMode)
-            {
-                actualLine[linePos] = '\0';
-                if (linePos != 0)
-                {
-                    linePos--;
-                }
-            }
-                        
-            break;
-
-        case '\t':
-            if (commandMode == 0)
-            {
-                color++;
-                color = color % 10;
-            }
-            break;
-
-        default:
-
-            putCharAt(row, col, c, colors[color], bgColor);
-            col++;
-
-            if (commandMode)
-            {
-                if (linePos < LINE_MAX_CHAR)
-                {
-                    actualLine[linePos] = c;
-                    linePos++;
-                }
-                else
-                {
-                    char* errmsg = "That command is too long!\n\0";
-                    print(errmsg, 0, bgColor);
-                    beep();
-                }
-            }
-            break;
-    }
-}
-
-void readLine(char* line)
+void compile(char* line)
 {
     int error = tokenizeCommand(line);
     if (error == 0)
     {
         executeCommand();
+        cleanTokens();
     }
     else
     {
@@ -206,6 +40,17 @@ void readLine(char* line)
         print(initialMsg2, 0, bgcolor);
         print(errmsg, 0, bgcolor);
         beep();
+    }
+}
+
+void cleanTokens()
+{
+    for (int t = 0; t < MAX_TOKENS; t++)
+    {
+        for (int c = 0; c < TOKEN_MAX_CHAR; c++)
+        {
+            tokens[t][c] = '\0';
+        }
     }
 }
 

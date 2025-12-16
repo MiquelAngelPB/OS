@@ -42,13 +42,6 @@ void drawRectangle(unsigned short x, unsigned short y, unsigned short width, uns
 void clearScreen();
 void render();
 
-//Console.c
-extern int showCursor;
-void clear();
-void print(char* str, int commandMode, char bgColor);
-void putChar(char c, int commandMode, char bgColor);
-void setColor(int c);
-
 //Programs
 void consoleMain();
 void raycasterMain();
