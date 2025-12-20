@@ -1,4 +1,8 @@
-#include "API.h"
+#include "Graphics.h"
+#include "Console.h"
+#include "IO.h"
+#include "Audio.h"
+
 #define BYTES_PER_CHAR 2
 #define LINE_MAX_CHAR 100
 
@@ -6,7 +10,7 @@
 volatile char* buffer = (volatile char*)0xb8000;
 char actualLine[LINE_MAX_CHAR] = {'\0'};
 int showCursor = 1;
-int color = 0x07;   //Source: https://wiki.osdev.org/Text_UI
+char color = 0x07;   //Source: https://wiki.osdev.org/Text_UI
 char bgColor = 0x00;
 int col = 0;
 int row = 0;
@@ -144,12 +148,6 @@ void putChar(char chr)
                     actualLine[linePos] = chr;
                     linePos++;
                 }
-                else
-                {
-                    char* errmsg = "That command is too long!\n\0";
-                    print(errmsg);
-                    beep();
-                }
             }
             break;
     }
@@ -161,9 +159,19 @@ void setColor(char col)
     color = col;
 }
 
+char getConsoleColor()
+{
+    return color;
+}
+
 void setBGColor(char col)
 {
     bgColor = col;
+}
+
+char getBGConsoleColor()
+{
+    return bgColor;
 }
 
 void setCommandMode(int mode)

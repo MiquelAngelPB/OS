@@ -1,5 +1,3 @@
-#include "API.h"
-
 // first 4 bytes: line. Last 4 bytes: column.
 //https://upload.wikimedia.org/wikipedia/commons/4/49/VGA_palette.svg
 //From: https://stackoverflow.com/questions/22052973/256-color-chart-for-mode-13h
@@ -12,7 +10,7 @@ unsigned char backBuffer[64000];
 // Licensed under CC Attribution-ShareAlike 4.0 International: https://creativecommons.org/licenses/by-sa/4.0/
 // ----------------------------------------------------------------
 
-const int cp437_font[256][8] = {
+const int cp437Font[256][8] = {
   {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // [] (0)
   {0x7e, 0x81, 0xa5, 0x81, 0xbd, 0x99, 0x81, 0x7e}, // [☺] (1)
   {0x7e, 0xff, 0xdb, 0xff, 0xc3, 0xe7, 0xff, 0x7e}, // [☻] (2)
@@ -271,11 +269,6 @@ const int cp437_font[256][8] = {
   {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // [ ] (255)
 };
 
-void clearScreen()
-{
-    for (int i = 0; i < 64000; i++) backBuffer[i] = 0x00;
-    render();
-}
 
 void putCharAt(unsigned int row, unsigned int col, char chr, char color, char bgColor)
 {
@@ -286,7 +279,7 @@ void putCharAt(unsigned int row, unsigned int col, char chr, char color, char bg
     
     for (int y = 0; y < 8; y++)
     {
-        char val = cp437_font[(unsigned char)chr][y];
+        char val = cp437Font[(unsigned char)chr][y];
 
         for (int x = 0; x < 8; x++)
         {
@@ -324,4 +317,10 @@ void render() {
     {
         dst[i] = src[i];
     }
+}
+
+void clearScreen()
+{
+    for (int i = 0; i < 32000; i++) backBuffer[i] = 0x00;
+    render();
 }

@@ -1,9 +1,6 @@
-#include "API.h"
-
 #define PI 3.14159265358979323846
 
 //trigonometry
-
 float sinTable[360] = {
     0.00000, 0.01745, 0.03490, 0.05234, 0.06976, 0.08716, 0.10453, 0.12187, 
     0.13917, 0.15643, 0.17365, 0.19081, 0.20791, 0.22495, 0.24192, 0.25882, 
@@ -78,7 +75,6 @@ int norm360(int a) {
 }
 
 //general functions
-
 float abs(float x)   { return x < 0 ? -x : x; }
 float frac(float x)  { return x - (int)x; }
 float lerp(float a, float b, float t) { return a + t * (b - a); }

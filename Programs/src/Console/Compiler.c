@@ -1,3 +1,10 @@
+#include "Console.h"
+#include "Audio.h"
+#include "Graphics.h"
+#include "Programs.h"
+#include "IO.h"
+#include "Strings.h"
+
 #define LINE_MAX_CHAR 100
 #define TOKEN_MAX_CHAR 11 //only 10 are used, the last one is a null character
 #define MAX_TOKENS 10
@@ -10,16 +17,15 @@ char* errCodes[3] = {
 };
 
 char tokens[MAX_TOKENS][TOKEN_MAX_CHAR] = {'\0'};
-char actualLine[LINE_MAX_CHAR] = {'\0'};
 
 //methods
 void compile(char* line);
 void draw(char* target, char* x, char* y, char* width, char* height);
 void run(char* target);
 void executeCommand();
-int tokenizeCommand(char* line);
 void memory(char* inst, char* addr, char* val);
 void cleanTokens();
+int tokenizeCommand(char* line);
 
 void compile(char* line)
 {
@@ -35,10 +41,10 @@ void compile(char* line)
         char* initialMsg = "Error \0";
         char* initialMsg2 = ": \0";
 
-        print(initialMsg, 0, bgcolor);
-        putChar(error + '0', 0, bgcolor);
-        print(initialMsg2, 0, bgcolor);
-        print(errmsg, 0, bgcolor);
+        print(initialMsg);
+        putChar(error + '0');
+        print(initialMsg2);
+        print(errmsg);
         beep();
     }
 }
@@ -65,7 +71,7 @@ void executeCommand()
 
     if (cmpstr(command, "clear\0"))
     {
-        clear();
+        clearConsole();
     } 
     else if (cmpstr(command, "halt\0"))
     {
@@ -73,11 +79,11 @@ void executeCommand()
     } 
     else if (cmpstr(command, "text\0"))
     {
-        commandMode = 0;
-        clear();
+        setCommandMode(0);
+        clearConsole();
         char* msg = "Text mode activated, now you're trapped \n(haven't implemented a way to exit this mode yet)\n"
                     "Press TAB to change color.\n\n\0";
-        print(msg, 0, bgcolor);
+        print(msg);
         beep();
     } 
     else if (cmpstr(command, "run\0"))
@@ -102,16 +108,16 @@ void executeCommand()
         "> run\n"
         "> draw\n"
         "> help\n";
-        print(msg, 0, bgcolor);
+        print(msg);
     } 
     else 
     {
         char* errmsg = "That command doesnt exist! Type help for a list of commands.\n\0";
-        print(errmsg, 0, bgcolor);
+        print(errmsg);
         beep();
     }
     
-    putChar('\n', 0, bgcolor);
+    putChar('\n');
 }
 
 void memory(char* inst, char* addr, char* val)
@@ -119,22 +125,22 @@ void memory(char* inst, char* addr, char* val)
     if (cmpstr(inst, "set\0"))
     {
         setMem(strToHex(addr), (char)strToHex(val));
-        print("Done.\n", 0, 0x00);
+        print("Done.\n");
     }
     else if (cmpstr(inst, "read\0"))
     {
-        putChar(readMem(strToHex(addr)), 0, 0x00);
+        putChar(readMem(strToHex(addr)));
     }
 }
 
 void draw(char* target, char* x, char* y, char* width, char* height)
 {
-    int tmpColor = color;
+    int tmpColor = getConsoleColor();
 
     if (cmpstr(target, "logo\0"))
     {
-        clear();
-        color = 6;
+        clearConsole();
+        setColor(0x09);
         char* drawing = " \n"
         " #####  #####  \n"
         " #   #  #      \n"
@@ -142,12 +148,12 @@ void draw(char* target, char* x, char* y, char* width, char* height)
         " #   #      #  \n"
         " #####  #####  \n"
         "               \n\n";
-        print(drawing, 0, bgcolor);
+        print(drawing);
     }
     else if (cmpstr(target, "templeos\0"))
     {
-        clear();
-        color = 1;
+        clearConsole();
+        setColor(0x0E);
         char* drawing = "             \n"       
         "                       A     \n"
         "                     AAB     \n"
@@ -168,12 +174,12 @@ void draw(char* target, char* x, char* y, char* width, char* height)
         "                             \n"
         "I was chosen by God because I am the best programmer on the planet\n and God boosted my IQ with divine intellect.\n -Terry A. Davis";
                                           
-        print(drawing, 0, bgcolor);
+        print(drawing);
     }
     else if (cmpstr(target, "linux\0"))
     {
-        clear();
-        color = 0;
+        clearConsole();
+        setColor(0x0F);
         char* drawing = "\n"      
         "          nnnn_\n"
         "        dGGGGMMb\n"
@@ -191,7 +197,7 @@ void draw(char* target, char* x, char* y, char* width, char* height)
         "_)      |.___.,|     .`\n"
         "|____   )MMMMMP|   .`\n"
         "     `-·       `--· \n";
-        print(drawing, 0, bgcolor);
+        print(drawing);
     }
     else if (cmpstr(target, "help\0"))
     {
@@ -201,7 +207,7 @@ void draw(char* target, char* x, char* y, char* width, char* height)
         "> draw linux\n"
         "> draw rectangle x y width height\n"
         "> draw help\n";
-        print(msg, 0, bgcolor);
+        print(msg);
     }
     else if (cmpstr(target, "rectangle\0"))
     {
@@ -219,31 +225,29 @@ void draw(char* target, char* x, char* y, char* width, char* height)
             else
             {
                 char* errmsg = "Invalid arguments, type draw help for help.\n\0";
-                print(errmsg, 0, bgcolor);
+                print(errmsg);
                 beep();
             }
         }
         else
         {
             char* errmsg = "Not enough arguments, type draw help for help.\n\0";
-            print(errmsg, 0, bgcolor);
+            print(errmsg);
             beep();
         }
     }
     else
     {
         char* errmsg = "That's not a valid argument, type draw help for a list of drawings.\n\0";
-        print(errmsg, 0, bgcolor);
+        print(errmsg);
         beep();
     }
 
-    color = tmpColor;
+    setColor(tmpColor);
 }
 
 void run(char* target)
 {
-    int tmpColor = color;
-
     if (cmpstr(target, "raycaster\0"))
     {
         raycasterMain();
@@ -253,12 +257,12 @@ void run(char* target)
         char* msg = "You can run the following programs: \n"
         "> run raycaster\n"
         "> run help\n";
-        print(msg, 0, bgcolor);
+        print(msg);
     }
     else
     {
         char* errmsg = "That's not a valid argument, type run help for a list of programs.\n\0";
-        print(errmsg, 0, bgcolor);
+        print(errmsg);
         beep();
     }
 }

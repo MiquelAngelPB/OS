@@ -1,5 +1,7 @@
-#include "API.h"
 #include "Console.h"
+#include "Graphics.h"
+#include "IO.h"
+#include "Math.h"
 
 #define MAP_SIZE 8
 #define MAP_OFFSET_X 15
@@ -262,7 +264,7 @@ void castRay(int a)
         }
     }
 
-    //float tFixed = t * cos(a - pa); //remove fishbowl effect
+    //float tFixed = t * cos(a - pa); //remove fisheye effect
     drawColumn((a - pa) * 3, 100 - (t * VERTICALITY), wallSide ? 0x04 : 0x0C);
 }   
 
