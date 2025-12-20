@@ -32,6 +32,7 @@ IMG = Img/os.img
 Kernel_SECTORS = $(shell bytes=$$(stat -c%s $(Kernel_BIN)); echo $$(( (bytes + 511) / 512 )))
 
 boot: $(Bootloader_ASM) linkkernel
+	@echo Kernel sectors: $(Kernel_SECTORS)
 	nasm $(Bootloader_ASM) -o $(Bootloader_BIN) -D KERNEL_SECTORS=$(Kernel_SECTORS)
 
 kernelentry: $(KernelEntry_ASM)
@@ -42,9 +43,10 @@ kernel: kernelentry
 	#Thanks Andrew
 	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(Kernel_C) -o $(Kernel_O)
 
-linkkernel: $(LinkerScript) kernel API programs
+linkkernel: $(LinkerScript) kernel API programs padding
 	$(CrossCompiler)/i686-elf-ld -T $(LinkerScript) $(Flags_LD) $(KernelEntry_O) $(API_O) $(Programs_O) $(Kernel_O) -o $(Kernel_ELF)
 	$(CrossCompiler)/i686-elf-objcopy -O binary $(Kernel_ELF) $(Kernel_BIN)
+	cat $(Zeroes_BIN) >> $(Kernel_BIN)
 
 API:
 	nasm $(Flags_ASM) $(API)/src/*.asm -o $(API)/bin/API_ASM.o
@@ -65,10 +67,9 @@ programs: $(Programs_BIN)
 padding: $(Zeroes_ASM)
 	nasm $(Zeroes_ASM) -o $(Zeroes_BIN)
 
-image: boot padding
+image: boot linkkernel
 	dd if=$(Bootloader_BIN) of=$(IMG) bs=512 count=2 status=none
 	dd if=$(Kernel_BIN) 	of=$(IMG) bs=512 seek=1 status=none
-	cat $(Zeroes_BIN) >> $(IMG)
 
 run: image
 	qemu-system-x86_64 -drive format=raw,file=$(IMG) -monitor stdio -audiodev pa,id=speaker -machine pcspk-audiodev=speaker
