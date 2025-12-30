@@ -48,7 +48,7 @@ kernel: kernelentry
 	#Thanks Andrew
 	$(CrossCompiler)/i686-elf-gcc $(Flags_C) $(Kernel_C) -o $(Kernel_O)
 
-linkkernel: $(LinkerScript) kernel $(API_O)
+linkkernel: $(LinkerScript) kernel $(API_O) $(Programs_O)
 	$(CrossCompiler)/i686-elf-ld -T $(LinkerScript) $(KernelEntry_O) $(Kernel_O) $(Programs_O) $(API_O) -o $(Kernel_ELF)
        	
 	$(CrossCompiler)/i686-elf-objcopy -O binary $(Kernel_ELF) $(Kernel_BIN)

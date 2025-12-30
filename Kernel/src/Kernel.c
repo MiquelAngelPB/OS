@@ -28,6 +28,7 @@ extern void kernelmain(void)
     print(string2);
 
     render();
+    setCommandMode(1);
     consoleMain();
     while(1); //stop
 }

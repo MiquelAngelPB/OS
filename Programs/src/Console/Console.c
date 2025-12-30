@@ -102,7 +102,7 @@ void putChar(char chr)
 
             if (commandMode == 1)
             {                
-                //compile here <------------------------------------------------------------
+                compile(actualLine); //compile here <---------------------------------------------------
                 for (int i = 0; i < LINE_MAX_CHAR; i++)
                 {
                     actualLine[i] = '\0';
