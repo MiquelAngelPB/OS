@@ -17,14 +17,3 @@ char readKeyASCII()
     char scancode = readKey();
     return scancodeToASCII[scancode];
 }
-
-void moveCursor(short row, short col)
-{
-    //https://wiki.osdev.org/Text_Mode_Cursor
-    short i = row * 80 + col;
-
-    outPort(0x3D4, 0x0F);
-	outPort(0x3D5, (char) (i & 0xFF));
-	outPort(0x3D4, 0x0E);
-	outPort(0x3D5, (char) ((i >> 8) & 0xFF));
-}

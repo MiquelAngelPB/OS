@@ -13,6 +13,9 @@ char* title = " \n"
 
 extern void kernelmain(void)
 {
+    volatile unsigned char* const frameBuffer = (unsigned char*)0xA0000;
+    frameBuffer[0] = 0x09;
+
     setCommandMode(0);
     setBGColor(0x00);
     clearScreen();

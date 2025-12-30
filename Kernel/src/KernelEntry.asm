@@ -1,13 +1,13 @@
 [bits 32]
 
-extern kernelmain
 global start
+extern kernelmain
 
 start:
-    
     mov ebp, 0x90000
     and ebp, 0xfffffff0
     mov esp, ebp
+    
     call kernelmain ;VSCode might complain with a false error.
     jmp halt
 

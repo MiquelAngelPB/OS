@@ -177,9 +177,9 @@ startprotectedmode:
     mov gs, ax
     mov ebp, 0x90000
     mov esp, ebp
-
+    
     mov eax, KERNEL_PHYSICAL
-    jmp eax ;CODE_SEGMENT:KERNEL_PHYSICAL   ;jump to kernel
+    jmp CODE_SEGMENT:KERNEL_PHYSICAL   ;jump to kernel
 
 dap: ;Disk Adress Packet
     db 0x10             ;DAP size
