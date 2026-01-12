@@ -9,6 +9,21 @@
 #define TOKEN_MAX_CHAR 11 //only 10 are used, the last one is a null character
 #define MAX_TOKENS 10
 
+typedef struct {
+    char* name;
+    int (*fn)(int argc, char** args)
+} cmdEntry;
+
+cmdEntry commands[] = {
+    {"run", cmd_run},
+    {"draw", cmd_run},
+    {"help", cmd_run},
+    {"memory", cmd_run},
+    {"clear", cmd_run},
+    {"halt", cmd_run},
+    {"text", cmd_run}
+};
+
 //variables
 char* errCodes[3] = {
     "Everything is fine, you shouldn't be seeing this\n\0",
@@ -246,7 +261,7 @@ void draw(char* target, char* x, char* y, char* width, char* height)
     setColor(tmpColor);
 }
 
-void run(char* target)
+void cmd_run(char* target)
 {
     if (cmpstr(target, "raycaster\0"))
     {
